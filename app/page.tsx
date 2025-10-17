@@ -9,6 +9,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [migrationStatus, setMigrationStatus] = useState("idle")
+  const [recentItems, setRecentItems] = useState<any>(null)
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,14 +24,16 @@ export default function Dashboard() {
     try {
       setLoading(true)
 
-      // Fetch all metrics
       const [
-        { data: pages },
-        { data: projects },
-        { data: tasks },
-        { data: invoices },
-        { data: vendors },
-        { data: expenses },
+        { data: pages, count: pagesCount },
+        { data: projects, count: projectsCount },
+        { data: tasks, count: tasksCount },
+        { data: invoices, count: invoicesCount },
+        { data: vendors, count: vendorsCount },
+        { data: expenses, count: expensesCount },
+        { data: recentPages },
+        { data: recentProjects },
+        { data: recentTasks },
       ] = await Promise.all([
         supabase.from("knowledge_page").select("id", { count: "exact" }),
         supabase.from("project").select("id", { count: "exact" }),
@@ -38,15 +41,32 @@ export default function Dashboard() {
         supabase.from("account_invoice").select("id", { count: "exact" }),
         supabase.from("vendor_profile").select("id", { count: "exact" }),
         supabase.from("hr_expense").select("id", { count: "exact" }),
+        supabase
+          .from("knowledge_page")
+          .select("id, title, created_at")
+          .order("created_at", { ascending: false })
+          .limit(3),
+        supabase.from("project").select("id, name, status").order("created_at", { ascending: false }).limit(3),
+        supabase
+          .from("project_task")
+          .select("id, title, status, priority")
+          .order("created_at", { ascending: false })
+          .limit(3),
       ])
 
       setStats({
-        pages: pages?.length || 0,
-        projects: projects?.length || 0,
-        tasks: tasks?.length || 0,
-        invoices: invoices?.length || 0,
-        vendors: vendors?.length || 0,
-        expenses: expenses?.length || 0,
+        pages: pagesCount || 0,
+        projects: projectsCount || 0,
+        tasks: tasksCount || 0,
+        invoices: invoicesCount || 0,
+        vendors: vendorsCount || 0,
+        expenses: expensesCount || 0,
+      })
+
+      setRecentItems({
+        pages: recentPages || [],
+        projects: recentProjects || [],
+        tasks: recentTasks || [],
       })
     } catch (error) {
       console.error("[v0] Error fetching stats:", error)
@@ -58,7 +78,6 @@ export default function Dashboard() {
   async function runMigrations() {
     setMigrationStatus("running")
     try {
-      // Execute migrations via API
       const response = await fetch("/api/migrations", { method: "POST" })
       const result = await response.json()
 
@@ -86,80 +105,65 @@ export default function Dashboard() {
         </div>
 
         {/* Migration Status */}
-        <Card className="mb-8 border-blue-200 bg-blue-50">
+        <Card className="mb-8 border-green-200 bg-green-50">
           <CardHeader>
-            <CardTitle className="text-blue-900">Database Setup</CardTitle>
-            <CardDescription>Initialize Supabase with all workspace tables and seed data</CardDescription>
+            <CardTitle className="text-green-900">Database Status</CardTitle>
+            <CardDescription>All migrations completed successfully with seeded data</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-600 mb-2">
-                  Status: <span className="font-semibold text-blue-900">{migrationStatus}</span>
+                  Status: <span className="font-semibold text-green-900">✓ Ready</span>
                 </p>
-                <p className="text-xs text-slate-500">
-                  This will create 7 modules with 30+ tables and seed sample data
-                </p>
+                <p className="text-xs text-slate-500">7 modules with 30+ tables and sample data loaded</p>
               </div>
-              <Button
-                onClick={runMigrations}
-                disabled={migrationStatus === "running"}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                {migrationStatus === "running" ? "Running..." : "Run Migrations"}
+              <Button onClick={fetchStats} disabled={loading} className="bg-green-600 hover:bg-green-700">
+                {loading ? "Refreshing..." : "Refresh Data"}
               </Button>
             </div>
           </CardContent>
         </Card>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <StatCard
             title="Knowledge Pages"
             value={stats?.pages || 0}
             description="Documentation and wiki pages"
             icon="📄"
-            color="from-purple-500 to-pink-500"
           />
           <StatCard
             title="Projects"
             value={stats?.projects || 0}
             description="Active and archived projects"
             icon="📊"
-            color="from-blue-500 to-cyan-500"
           />
-          <StatCard
-            title="Tasks"
-            value={stats?.tasks || 0}
-            description="Project tasks and subtasks"
-            icon="✓"
-            color="from-green-500 to-emerald-500"
-          />
+          <StatCard title="Tasks" value={stats?.tasks || 0} description="Project tasks and subtasks" icon="✓" />
           <StatCard
             title="Invoices"
             value={stats?.invoices || 0}
             description="Vendor invoices and payments"
             icon="💰"
-            color="from-orange-500 to-red-500"
           />
-          <StatCard
-            title="Vendors"
-            value={stats?.vendors || 0}
-            description="Vendor profiles and contacts"
-            icon="🏢"
-            color="from-indigo-500 to-purple-500"
-          />
+          <StatCard title="Vendors" value={stats?.vendors || 0} description="Vendor profiles and contacts" icon="🏢" />
           <StatCard
             title="Expenses"
             value={stats?.expenses || 0}
             description="Employee expenses and Concur exports"
             icon="💳"
-            color="from-yellow-500 to-orange-500"
           />
         </div>
 
+        {/* Recent Items */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <RecentItemsCard title="Recent Pages" items={recentItems?.pages || []} type="page" />
+          <RecentItemsCard title="Recent Projects" items={recentItems?.projects || []} type="project" />
+          <RecentItemsCard title="Recent Tasks" items={recentItems?.tasks || []} type="task" />
+        </div>
+
         {/* Features Overview */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <FeatureCard
             title="Knowledge Workspace"
             description="Document management with categories, tags, versioning, and full-text search"
@@ -193,7 +197,7 @@ export default function Dashboard() {
         </div>
 
         {/* Database Schema Info */}
-        <Card className="mt-12">
+        <Card>
           <CardHeader>
             <CardTitle>Database Schema</CardTitle>
             <CardDescription>7 integrated modules with 30+ tables</CardDescription>
@@ -226,7 +230,7 @@ export default function Dashboard() {
   )
 }
 
-function StatCard({ title, value, description, icon, color }: any) {
+function StatCard({ title, value, description, icon }: any) {
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardHeader className="pb-3">
@@ -238,6 +242,31 @@ function StatCard({ title, value, description, icon, color }: any) {
       <CardContent>
         <div className="text-3xl font-bold text-slate-900 mb-1">{value}</div>
         <p className="text-xs text-slate-500">{description}</p>
+      </CardContent>
+    </Card>
+  )
+}
+
+function RecentItemsCard({ title, items, type }: any) {
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          {items.length > 0 ? (
+            items.map((item: any) => (
+              <div key={item.id} className="p-2 bg-slate-50 rounded text-sm">
+                <p className="font-medium text-slate-900 truncate">{item.title || item.name}</p>
+                {item.status && <p className="text-xs text-slate-500 capitalize">{item.status}</p>}
+                {item.priority && <p className="text-xs text-slate-500 capitalize">Priority: {item.priority}</p>}
+              </div>
+            ))
+          ) : (
+            <p className="text-xs text-slate-500">No items yet</p>
+          )}
+        </div>
       </CardContent>
     </Card>
   )

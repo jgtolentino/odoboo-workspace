@@ -30,8 +30,8 @@ CREATE TABLE IF NOT EXISTS user_preference (
 );
 
 -- Workspace Favorites
+-- Removed duplicate PRIMARY KEY definition - using composite key only
 CREATE TABLE IF NOT EXISTS workspace_favorite (
-  id BIGSERIAL PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id),
   entity_type VARCHAR(100),
   entity_id BIGINT,
