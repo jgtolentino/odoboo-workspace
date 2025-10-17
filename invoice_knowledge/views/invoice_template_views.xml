@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_invoice_template_tree" model="ir.ui.view">
+        <field name="name">invoice.template.tree</field>
+        <field name="model">invoice.template</field>
+        <field name="arch" type="xml">
+            <tree string="Invoice Templates">
+                <field name="sequence" widget="handle"/>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="company_id"/>
+                <field name="usage_count"/>
+                <field name="is_active"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_invoice_template_form" model="ir.ui.view">
+        <field name="name">invoice.template.form</field>
+        <field name="model">invoice.template</field>
+        <field name="arch" type="xml">
+            <form string="Invoice Template">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Template Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="company_id"/>
+                            <field name="is_active"/>
+                        </group>
+                        <group>
+                            <field name="sequence"/>
+                            <field name="usage_count" readonly="1"/>
+                        </group>
+                    </group>
+                    <field name="description" placeholder="Template description..."/>
+                    <separator string="Knowledge Integration"/>
+                    <field name="knowledge_page_id"/>
+                    <separator string="Template Content"/>
+                    <field name="template_content" widget="html"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_invoice_template" model="ir.actions.act_window">
+        <field name="name">Invoice Templates</field>
+        <field name="res_model">invoice.template</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_invoice_template" name="Invoice Templates" parent="account.menu_finance_configuration" action="action_invoice_template" sequence="20"/>
+</odoo>

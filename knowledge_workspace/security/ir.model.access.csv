@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_knowledge_page_user,knowledge.page user,model_knowledge_page,base.group_user,1,1,1,0
+access_knowledge_page_manager,knowledge.page manager,model_knowledge_page,base.group_system,1,1,1,1
+access_knowledge_category_user,knowledge.category user,model_knowledge_category,base.group_user,1,0,0,0
+access_knowledge_category_manager,knowledge.category manager,model_knowledge_category,base.group_system,1,1,1,1
+access_knowledge_tag_user,knowledge.tag user,model_knowledge_tag,base.group_user,1,0,0,0
+access_knowledge_tag_manager,knowledge.tag manager,model_knowledge_tag,base.group_system,1,1,1,1

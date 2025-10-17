@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extend Project Form -->
+    <record id="view_project_form_extended" model="ir.ui.view">
+        <field name="name">project.project.form.extended</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <separator string="Workspace Integration"/>
+                <group>
+                    <group>
+                        <field name="wiki_page_id"/>
+                        <field name="project_icon"/>
+                        <field name="project_color"/>
+                    </group>
+                    <group>
+                        <field name="total_tasks" readonly="1"/>
+                        <field name="completed_tasks" readonly="1"/>
+                        <field name="project_progress" readonly="1" widget="progressbar"/>
+                    </group>
+                </group>
+                <separator string="Team"/>
+                <field name="team_member_ids" widget="many2many_tags"/>
+                <separator string="Metrics"/>
+                <group>
+                    <field name="overdue_tasks" readonly="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Extend Project Tree -->
+    <record id="view_project_tree_extended" model="ir.ui.view">
+        <field name="name">project.project.tree.extended</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="inside">
+                <field name="project_progress"/>
+                <field name="total_tasks"/>
+                <field name="completed_tasks"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extend Invoice Form -->
+    <record id="view_account_move_form_extended" model="ir.ui.view">
+        <field name="name">account.move.form.extended</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <separator string="Knowledge Management"/>
+                <group>
+                    <group>
+                        <field name="invoice_template_id"/>
+                        <field name="knowledge_page_id"/>
+                        <field name="invoice_category" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="total_attachments" readonly="1"/>
+                        <field name="payment_status" readonly="1"/>
+                        <field name="days_overdue" readonly="1"/>
+                    </group>
+                </group>
+                <field name="approval_notes" placeholder="Add approval notes..."/>
+                <separator string="Attachments"/>
+                <field name="attachment_ids" widget="many2many"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Extend Invoice Tree -->
+    <record id="view_account_move_tree_extended" model="ir.ui.view">
+        <field name="name">account.move.tree.extended</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="inside">
+                <field name="invoice_category"/>
+                <field name="payment_status"/>
+                <field name="days_overdue"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_account_move_search_extended" model="ir.ui.view">
+        <field name="name">account.move.search.extended</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <separator/>
+                <filter name="overdue" string="Overdue" domain="[('payment_status', '=', 'overdue')]"/>
+                <filter name="unpaid" string="Unpaid" domain="[('payment_status', 'in', ['unpaid', 'partial'])]"/>
+                <filter name="paid" string="Paid" domain="[('payment_status', '=', 'paid')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_category" string="Category" context="{'group_by': 'invoice_category'}"/>
+                    <filter name="group_status" string="Payment Status" context="{'group_by': 'payment_status'}"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

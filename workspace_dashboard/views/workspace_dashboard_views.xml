@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form View -->
+    <record id="view_workspace_dashboard_form" model="ir.ui.view">
+        <field name="name">workspace.dashboard.form</field>
+        <field name="model">workspace.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="Workspace Dashboard">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="dashboard_name" placeholder="Dashboard Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="user_id" readonly="1"/>
+                            <field name="is_default"/>
+                        </group>
+                    </group>
+                    <separator string="Dashboard Widgets"/>
+                    <group>
+                        <group string="Visible Widgets">
+                            <field name="show_knowledge"/>
+                            <field name="show_expenses"/>
+                            <field name="show_projects"/>
+                        </group>
+                        <group>
+                            <field name="show_invoices"/>
+                            <field name="show_vendors"/>
+                            <field name="show_metrics"/>
+                            <field name="show_activity"/>
+                        </group>
+                    </group>
+                    <separator string="Widget Order"/>
+                    <field name="widget_order" placeholder="knowledge,expenses,projects,invoices,vendors,metrics,activity"/>
+                    <separator string="Quick Stats"/>
+                    <group>
+                        <group>
+                            <field name="recent_pages" readonly="1"/>
+                            <field name="pending_tasks" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="pending_expenses" readonly="1"/>
+                            <field name="overdue_invoices" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_workspace_dashboard" model="ir.actions.act_window">
+        <field name="name">Workspace Dashboard</field>
+        <field name="res_model">workspace.dashboard</field>
+        <field name="view_mode">form</field>
+        <field name="target">main</field>
+    </record>
+</odoo>

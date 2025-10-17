@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_workspace_dashboard_user,workspace.dashboard user,model_workspace_dashboard,base.group_user,1,1,1,0
+access_workspace_dashboard_manager,workspace.dashboard manager,model_workspace_dashboard,base.group_system,1,1,1,1
+access_workspace_activity_user,workspace.activity user,model_workspace_activity,base.group_user,1,0,0,0
+access_workspace_activity_manager,workspace.activity manager,model_workspace_activity,base.group_system,1,1,1,1
+access_workspace_preferences_user,workspace.preferences user,model_workspace_preferences,base.group_user,1,1,1,0
+access_workspace_preferences_manager,workspace.preferences manager,model_workspace_preferences,base.group_system,1,1,1,1

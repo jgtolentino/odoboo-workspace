@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_project_workspace" name="Projects" parent="project.menu_project_config" sequence="5"/>
+    <menuitem id="menu_project_wiki" name="Project Wiki" parent="menu_project_workspace" action="action_project_wiki_tree" sequence="10"/>
+</odoo>

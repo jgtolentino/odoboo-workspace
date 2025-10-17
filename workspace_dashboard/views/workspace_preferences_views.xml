@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form View -->
+    <record id="view_workspace_preferences_form" model="ir.ui.view">
+        <field name="name">workspace.preferences.form</field>
+        <field name="model">workspace.preferences</field>
+        <field name="arch" type="xml">
+            <form string="Workspace Preferences">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>My Workspace Preferences</h1>
+                    </div>
+                    <group>
+                        <group string="Display">
+                            <field name="theme"/>
+                            <field name="items_per_page"/>
+                            <field name="sidebar_collapsed"/>
+                        </group>
+                        <group string="Defaults">
+                            <field name="default_view"/>
+                            <field name="show_tips"/>
+                            <field name="enable_quick_search"/>
+                        </group>
+                    </group>
+                    <separator string="Notifications"/>
+                    <group>
+                        <group>
+                            <field name="notify_task_assigned"/>
+                            <field name="notify_expense_approved"/>
+                        </group>
+                        <group>
+                            <field name="notify_invoice_overdue"/>
+                            <field name="notify_document_shared"/>
+                        </group>
+                    </group>
+                    <separator string="Favorites"/>
+                    <field name="favorite_modules" placeholder="knowledge,projects,expenses"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_workspace_preferences" model="ir.actions.act_window">
+        <field name="name">My Preferences</field>
+        <field name="res_model">workspace.preferences</field>
+        <field name="view_mode">form</field>
+        <field name="target">main</field>
+    </record>
+</odoo>

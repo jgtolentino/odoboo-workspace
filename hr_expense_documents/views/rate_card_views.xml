@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_vendor_rate_card_tree" model="ir.ui.view">
+    <field name="name">vendor.rate.card.tree</field>
+    <field name="model">vendor.rate.card</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name"/>
+        <field name="partner_id"/>
+        <field name="version"/>
+        <field name="status"/>
+        <field name="valid_from"/>
+        <field name="valid_to"/>
+        <field name="active"/>
+      </tree>
+    </field>
+  </record>
+
+  <record id="view_vendor_rate_card_form" model="ir.ui.view">
+    <field name="name">vendor.rate.card.form</field>
+    <field name="model">vendor.rate.card</field>
+    <field name="arch" type="xml">
+      <form string="Vendor Rate Card">
+        <sheet>
+          <group>
+            <field name="name"/>
+            <field name="partner_id"/>
+            <field name="version"/>
+            <field name="status"/>
+            <field name="valid_from"/>
+            <field name="valid_to"/>
+            <field name="active"/>
+          </group>
+          <notebook>
+            <page string="Items">
+              <field name="item_ids">
+                <tree editable="bottom">
+                  <field name="role_id"/>
+                  <field name="region_id"/>
+                  <field name="unit"/>
+                  <field name="price"/>
+                  <field name="currency_id"/>
+                  <field name="sla_tier"/>
+                  <field name="valid_from"/>
+                  <field name="valid_to"/>
+                </tree>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_vendor_rate_card" model="ir.actions.act_window">
+    <field name="name">Rate Cards</field>
+    <field name="res_model">vendor.rate.card</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+
+  <menuitem id="menu_expense_concur_root" name="Expense Integration" parent="hr_expense.menu_hr_expense_root"/>
+  <menuitem id="menu_vendor_rate_cards" name="Rate Cards" parent="menu_expense_concur_root" action="action_vendor_rate_card"/>
+</odoo>

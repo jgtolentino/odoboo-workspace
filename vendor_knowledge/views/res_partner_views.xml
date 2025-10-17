@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extend Partner Form -->
+    <record id="view_res_partner_form_extended" model="ir.ui.view">
+        <field name="name">res.partner.form.extended</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <separator string="Vendor Knowledge Base"/>
+                <group>
+                    <group>
+                        <field name="is_vendor_kb"/>
+                        <field name="vendor_category"/>
+                        <field name="vendor_rating"/>
+                        <field name="compliance_status"/>
+                    </group>
+                    <group>
+                        <field name="knowledge_page_id"/>
+                        <field name="total_documents" readonly="1"/>
+                        <field name="total_communications" readonly="1"/>
+                    </group>
+                </group>
+                <separator string="Vendor Metrics"/>
+                <group>
+                    <group>
+                        <field name="total_purchase_orders" readonly="1"/>
+                        <field name="total_spent" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="average_lead_time" readonly="1"/>
+                    </group>
+                </group>
+                <field name="certifications" placeholder="List certifications..."/>
+                <field name="vendor_notes" placeholder="Add vendor notes..."/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

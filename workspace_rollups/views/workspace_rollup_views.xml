@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_workspace_rollup_tree" model="ir.ui.view">
+        <field name="name">workspace.rollup.tree</field>
+        <field name="model">workspace.rollup</field>
+        <field name="arch" type="xml">
+            <tree string="Workspace Rollups">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="rollup_type"/>
+                <field name="source_model"/>
+                <field name="source_field"/>
+                <field name="rollup_result"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_workspace_rollup_form" model="ir.ui.view">
+        <field name="name">workspace.rollup.form</field>
+        <field name="model">workspace.rollup</field>
+        <field name="arch" type="xml">
+            <form string="Workspace Rollup">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Rollup Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="rollup_type"/>
+                            <field name="source_model"/>
+                            <field name="source_field"/>
+                        </group>
+                        <group>
+                            <field name="group_by_field"/>
+                            <field name="is_active"/>
+                            <field name="sequence"/>
+                        </group>
+                    </group>
+                    <field name="description" placeholder="Rollup description..."/>
+                    <field name="filter_domain" placeholder="[('state', '=', 'done')]"/>
+                    <separator string="Result"/>
+                    <field name="rollup_result" readonly="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_workspace_rollup" model="ir.actions.act_window">
+        <field name="name">Workspace Rollups</field>
+        <field name="res_model">workspace.rollup</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_workspace_rollup" name="Rollup Configuration" parent="knowledge_workspace.menu_knowledge_root" action="action_workspace_rollup" sequence="101"/>
+</odoo>

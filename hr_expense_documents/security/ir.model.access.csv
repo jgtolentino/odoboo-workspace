@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_expense_category_user,expense.category user,model_expense_category,base.group_user,1,0,0,0
+access_expense_category_manager,expense.category manager,model_expense_category,base.group_system,1,1,1,1
+access_vendor_rate_card_user,vendor.rate.card user,model_vendor_rate_card,base.group_user,1,1,1,0
+access_vendor_rate_card_item_user,vendor.rate.card.item user,model_vendor_rate_card_item,base.group_user,1,1,1,0
+access_concur_mapping_manager,concur.mapping manager,model_concur_mapping,base.group_system,1,1,1,1

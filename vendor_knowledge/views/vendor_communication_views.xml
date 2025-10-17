@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_vendor_communication_tree" model="ir.ui.view">
+        <field name="name">vendor.communication.tree</field>
+        <field name="model">vendor.communication</field>
+        <field name="arch" type="xml">
+            <tree string="Vendor Communications">
+                <field name="communication_date"/>
+                <field name="vendor_id"/>
+                <field name="communication_type"/>
+                <field name="subject"/>
+                <field name="user_id"/>
+                <field name="follow_up_required"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_vendor_communication_form" model="ir.ui.view">
+        <field name="name">vendor.communication.form</field>
+        <field name="model">vendor.communication</field>
+        <field name="arch" type="xml">
+            <form string="Vendor Communication">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="subject" placeholder="Communication Subject"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="vendor_id"/>
+                            <field name="communication_type"/>
+                            <field name="communication_date"/>
+                        </group>
+                        <group>
+                            <field name="user_id"/>
+                            <field name="follow_up_required"/>
+                            <field name="follow_up_date" attrs="{'invisible': [('follow_up_required', '=', False)]}"/>
+                        </group>
+                    </group>
+                    <field name="description" widget="html"/>
+                    <separator string="Attachments"/>
+                    <field name="attachment_ids" widget="many2many"/>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_vendor_communication" model="ir.actions.act_window">
+        <field name="name">Vendor Communications</field>
+        <field name="res_model">vendor.communication</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_vendor_communication" name="Vendor Communications" parent="purchase.menu_purchase_config" action="action_vendor_communication" sequence="21"/>
+</odoo>

@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_workspace_metric_user,workspace.metric user,model_workspace_metric,base.group_user,1,0,0,0
+access_workspace_metric_manager,workspace.metric manager,model_workspace_metric,base.group_system,1,1,1,1
+access_workspace_rollup_user,workspace.rollup user,model_workspace_rollup,base.group_user,1,0,0,0
+access_workspace_rollup_manager,workspace.rollup manager,model_workspace_rollup,base.group_system,1,1,1,1

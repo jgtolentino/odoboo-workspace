@@ -1,0 +1,85 @@
+/* Workspace Dashboard Styles */
+
+.workspace-dashboard {
+  background-color: #f5f5f5;
+  padding: 20px;
+}
+
+.workspace-widget {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.workspace-widget-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.workspace-metric {
+  display: flex;
+  justify-content: space-around;
+  gap: 20px;
+}
+
+.workspace-metric-item {
+  text-align: center;
+  flex: 1;
+}
+
+.workspace-metric-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #007bff;
+}
+
+.workspace-metric-label {
+  font-size: 14px;
+  color: #666;
+  margin-top: 5px;
+}
+
+.workspace-quick-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.workspace-quick-link {
+  padding: 15px;
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.workspace-quick-link:hover {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.workspace-activity-item {
+  padding: 12px;
+  border-left: 3px solid #007bff;
+  margin-bottom: 10px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+}
+
+.workspace-activity-time {
+  font-size: 12px;
+  color: #999;
+}
+
+.workspace-activity-description {
+  font-size: 14px;
+  color: #333;
+  margin-top: 5px;
+}

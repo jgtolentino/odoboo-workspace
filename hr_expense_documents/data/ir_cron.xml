@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="ir_cron_expense_export" model="ir.cron">
+    <field name="name">Expense Export Queue (Concur)</field>
+    <field name="model_id" ref="hr_expense.model_hr_expense"/>
+    <field name="state">code</field>
+    <field name="code">env["hr.expense"].export_batch_to_concur_queue()</field>
+    <field name="interval_type">minutes</field>
+    <field name="interval_number">15</field>
+    <field name="numbercall">-1</field>
+    <field name="active">True</field>
+  </record>
+</odoo>

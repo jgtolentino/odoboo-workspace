@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_concur_mapping_tree" model="ir.ui.view">
+    <field name="name">concur.mapping.tree</field>
+    <field name="model">concur.mapping</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="kind"/>
+        <field name="concur_key"/>
+        <field name="odoo_ref_model"/>
+        <field name="odoo_ref_id"/>
+        <field name="active"/>
+      </tree>
+    </field>
+  </record>
+
+  <record id="view_concur_mapping_form" model="ir.ui.view">
+    <field name="name">concur.mapping.form</field>
+    <field name="model">concur.mapping</field>
+    <field name="arch" type="xml">
+      <form string="Concur Mapping">
+        <sheet>
+          <group>
+            <field name="kind"/>
+            <field name="concur_key"/>
+            <field name="odoo_ref_model"/>
+            <field name="odoo_ref_id"/>
+            <field name="active"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_concur_mapping" model="ir.actions.act_window">
+    <field name="name">Concur Mappings</field>
+    <field name="res_model">concur.mapping</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+
+  <menuitem id="menu_concur_mappings" name="Concur Mappings" parent="menu_expense_concur_root" action="action_concur_mapping"/>
+</odoo>

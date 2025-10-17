@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="param_use_concur" model="ir.config_parameter">
+    <field name="key">expense_integration.use_concur</field>
+    <field name="value">false</field>
+  </record>
+</odoo>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_workspace_metric_tree" model="ir.ui.view">
+        <field name="name">workspace.metric.tree</field>
+        <field name="model">workspace.metric</field>
+        <field name="arch" type="xml">
+            <tree string="Workspace Metrics">
+                <field name="metric_date"/>
+                <field name="total_pages"/>
+                <field name="total_tasks"/>
+                <field name="completed_tasks"/>
+                <field name="total_invoices"/>
+                <field name="total_vendors"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_workspace_metric_form" model="ir.ui.view">
+        <field name="name">workspace.metric.form</field>
+        <field name="model">workspace.metric</field>
+        <field name="arch" type="xml">
+            <form string="Workspace Metric">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="metric_date"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Knowledge Metrics">
+                            <field name="total_pages" readonly="1"/>
+                            <field name="total_categories" readonly="1"/>
+                        </group>
+                        <group string="HR Metrics">
+                            <field name="total_expenses" readonly="1"/>
+                            <field name="pending_expenses" readonly="1"/>
+                            <field name="approved_expenses" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Project Metrics">
+                            <field name="total_projects" readonly="1"/>
+                            <field name="total_tasks" readonly="1"/>
+                            <field name="completed_tasks" readonly="1"/>
+                            <field name="overall_project_progress" readonly="1" widget="progressbar"/>
+                        </group>
+                        <group string="Accounting Metrics">
+                            <field name="total_invoices" readonly="1"/>
+                            <field name="unpaid_invoices" readonly="1"/>
+                            <field name="total_invoice_amount" readonly="1"/>
+                            <field name="overdue_amount" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Vendor Metrics">
+                            <field name="total_vendors" readonly="1"/>
+                            <field name="active_vendors" readonly="1"/>
+                            <field name="total_vendor_spend" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_workspace_metric" model="ir.actions.act_window">
+        <field name="name">Workspace Metrics</field>
+        <field name="res_model">workspace.metric</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_workspace_metric" name="Workspace Metrics" parent="knowledge_workspace.menu_knowledge_root" action="action_workspace_metric" sequence="100"/>
+</odoo>

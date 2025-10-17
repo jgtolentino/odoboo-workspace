@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Main Workspace Menu -->
+    <menuitem id="menu_workspace_root" name="Workspace" sequence="1" web_icon="workspace_dashboard,static/description/icon.png"/>
+    
+    <!-- Dashboard -->
+    <menuitem id="menu_workspace_dashboard" name="Dashboard" parent="menu_workspace_root" action="action_workspace_dashboard" sequence="10"/>
+    
+    <!-- Quick Links -->
+    <menuitem id="menu_workspace_quick" name="Quick Access" parent="menu_workspace_root" sequence="20"/>
+    <menuitem id="menu_quick_knowledge" name="Knowledge" parent="menu_workspace_quick" action="knowledge_workspace.action_knowledge_page_tree" sequence="10"/>
+    <menuitem id="menu_quick_projects" name="Projects" parent="menu_workspace_quick" action="project.open_view_project_all" sequence="20"/>
+    <menuitem id="menu_quick_expenses" name="Expenses" parent="menu_workspace_quick" action="hr_expense.action_hr_expense_view_all" sequence="30"/>
+    <menuitem id="menu_quick_invoices" name="Invoices" parent="menu_workspace_quick" action="account.action_move_out_invoice_type" sequence="40"/>
+    <menuitem id="menu_quick_vendors" name="Vendors" parent="menu_workspace_quick" action="vendor_knowledge.action_vendor_document" sequence="50"/>
+    
+    <!-- Settings -->
+    <menuitem id="menu_workspace_settings" name="Workspace Settings" parent="menu_workspace_root" sequence="100"/>
+    <menuitem id="menu_workspace_prefs" name="My Preferences" parent="menu_workspace_settings" action="action_workspace_preferences" sequence="10"/>
+    <menuitem id="menu_workspace_activity" name="Activity Log" parent="menu_workspace_settings" action="action_workspace_activity" sequence="20"/>
+</odoo>
