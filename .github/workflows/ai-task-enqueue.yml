@@ -1,0 +1,29 @@
+name: Enqueue AI Task
+on:
+  issues:
+    types: [opened, edited, labeled]
+jobs:
+  enqueue:
+    if: contains(github.event.issue.labels.*.name, 'ai-task')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build payload
+        id: build
+        run: |
+          cat > payload.json <<'JSON'
+          {
+            "kind": "frontend:auto",
+            "prompt": {
+              "goal": "${{ github.event.issue.title }}",
+              "acceptance": "${{ github.event.issue.body }}".split("\n").filter(Boolean),
+              "files": [],
+              "guards": ["no service role in client"],
+              "verify": []
+            }
+          }
+          JSON
+      - name: Enqueue via Edge Function
+        run: |
+          curl -sS -X POST "https://${{ secrets.SUPABASE_PROJECT_REF }}.functions.supabase.co/work-queue/enqueue" \
+            -H "content-type: application/json" \
+            -d @payload.json

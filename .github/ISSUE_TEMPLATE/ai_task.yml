@@ -1,0 +1,20 @@
+name: AI Task
+description: Enqueue a task for Assistant/Cline
+labels: [ai-task]
+body:
+  - type: input
+    id: goal
+    attributes: { label: Goal, placeholder: 'Finish Odoo-like catalog with counts' }
+    validations: { required: true }
+  - type: textarea
+    id: acceptance
+    attributes: { label: Acceptance Criteria, placeholder: '- ...' }
+  - type: textarea
+    id: files
+    attributes: { label: Files, placeholder: "app/apps/page.tsx\ncomponents/AppCard.tsx" }
+  - type: textarea
+    id: guards
+    attributes: { label: Guards, placeholder: 'Do not touch /supabase/**' }
+  - type: textarea
+    id: verify
+    attributes: { label: Verify, placeholder: '/apps renders...' }

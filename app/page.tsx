@@ -1,28 +1,28 @@
-"use client"
+'use client';
 
-import { useEffect, useState } from "react"
-import { createBrowserClient } from "@supabase/ssr"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { useEffect, useState } from 'react';
+import { createBrowserClient } from '@supabase/ssr';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 export default function Dashboard() {
-  const [stats, setStats] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [migrationStatus, setMigrationStatus] = useState("idle")
-  const [recentItems, setRecentItems] = useState<any>(null)
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [migrationStatus, setMigrationStatus] = useState('idle');
+  const [recentItems, setRecentItems] = useState<any>(null);
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  )
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   useEffect(() => {
-    fetchStats()
-  }, [])
+    fetchStats();
+  }, []);
 
   async function fetchStats() {
     try {
-      setLoading(true)
+      setLoading(true);
 
       const [
         { data: pages, count: pagesCount },
@@ -35,24 +35,28 @@ export default function Dashboard() {
         { data: recentProjects },
         { data: recentTasks },
       ] = await Promise.all([
-        supabase.from("knowledge_page").select("id", { count: "exact" }),
-        supabase.from("project").select("id", { count: "exact" }),
-        supabase.from("project_task").select("id", { count: "exact" }),
-        supabase.from("account_invoice").select("id", { count: "exact" }),
-        supabase.from("vendor_profile").select("id", { count: "exact" }),
-        supabase.from("hr_expense").select("id", { count: "exact" }),
+        supabase.from('knowledge_page').select('id', { count: 'exact' }),
+        supabase.from('project').select('id', { count: 'exact' }),
+        supabase.from('project_task').select('id', { count: 'exact' }),
+        supabase.from('account_invoice').select('id', { count: 'exact' }),
+        supabase.from('vendor_profile').select('id', { count: 'exact' }),
+        supabase.from('hr_expense').select('id', { count: 'exact' }),
         supabase
-          .from("knowledge_page")
-          .select("id, title, created_at")
-          .order("created_at", { ascending: false })
+          .from('knowledge_page')
+          .select('id, title, created_at')
+          .order('created_at', { ascending: false })
           .limit(3),
-        supabase.from("project").select("id, name, status").order("created_at", { ascending: false }).limit(3),
         supabase
-          .from("project_task")
-          .select("id, title, status, priority")
-          .order("created_at", { ascending: false })
+          .from('project')
+          .select('id, name, status')
+          .order('created_at', { ascending: false })
           .limit(3),
-      ])
+        supabase
+          .from('project_task')
+          .select('id, title, status, priority')
+          .order('created_at', { ascending: false })
+          .limit(3),
+      ]);
 
       setStats({
         pages: pagesCount || 0,
@@ -61,35 +65,35 @@ export default function Dashboard() {
         invoices: invoicesCount || 0,
         vendors: vendorsCount || 0,
         expenses: expensesCount || 0,
-      })
+      });
 
       setRecentItems({
         pages: recentPages || [],
         projects: recentProjects || [],
         tasks: recentTasks || [],
-      })
+      });
     } catch (error) {
-      console.error("[v0] Error fetching stats:", error)
+      console.error('[v0] Error fetching stats:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function runMigrations() {
-    setMigrationStatus("running")
+    setMigrationStatus('running');
     try {
-      const response = await fetch("/api/migrations", { method: "POST" })
-      const result = await response.json()
+      const response = await fetch('/api/migrations', { method: 'POST' });
+      const result = await response.json();
 
       if (result.success) {
-        setMigrationStatus("completed")
-        setTimeout(() => fetchStats(), 1000)
+        setMigrationStatus('completed');
+        setTimeout(() => fetchStats(), 1000);
       } else {
-        setMigrationStatus("error")
+        setMigrationStatus('error');
       }
     } catch (error) {
-      console.error("[v0] Migration error:", error)
-      setMigrationStatus("error")
+      console.error('[v0] Migration error:', error);
+      setMigrationStatus('error');
     }
   }
 
@@ -98,17 +102,29 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">Odoo Notion Workspace</h1>
-          <p className="text-lg text-slate-600">
-            Unified workspace for HR, Projects, Accounting, and Vendor Management
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-slate-900 mb-2">Odoo Notion Workspace</h1>
+              <p className="text-lg text-slate-600">
+                Unified workspace for HR, Projects, Accounting, and Vendor Management
+              </p>
+            </div>
+            <a
+              href="/apps"
+              className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
+            >
+              Apps Catalog
+            </a>
+          </div>
         </div>
 
         {/* Migration Status */}
         <Card className="mb-8 border-green-200 bg-green-50">
           <CardHeader>
             <CardTitle className="text-green-900">Database Status</CardTitle>
-            <CardDescription>All migrations completed successfully with seeded data</CardDescription>
+            <CardDescription>
+              All migrations completed successfully with seeded data
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
@@ -116,10 +132,16 @@ export default function Dashboard() {
                 <p className="text-sm text-slate-600 mb-2">
                   Status: <span className="font-semibold text-green-900">✓ Ready</span>
                 </p>
-                <p className="text-xs text-slate-500">7 modules with 30+ tables and sample data loaded</p>
+                <p className="text-xs text-slate-500">
+                  7 modules with 30+ tables and sample data loaded
+                </p>
               </div>
-              <Button onClick={fetchStats} disabled={loading} className="bg-green-600 hover:bg-green-700">
-                {loading ? "Refreshing..." : "Refresh Data"}
+              <Button
+                onClick={fetchStats}
+                disabled={loading}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                {loading ? 'Refreshing...' : 'Refresh Data'}
               </Button>
             </div>
           </CardContent>
@@ -139,14 +161,24 @@ export default function Dashboard() {
             description="Active and archived projects"
             icon="📊"
           />
-          <StatCard title="Tasks" value={stats?.tasks || 0} description="Project tasks and subtasks" icon="✓" />
+          <StatCard
+            title="Tasks"
+            value={stats?.tasks || 0}
+            description="Project tasks and subtasks"
+            icon="✓"
+          />
           <StatCard
             title="Invoices"
             value={stats?.invoices || 0}
             description="Vendor invoices and payments"
             icon="💰"
           />
-          <StatCard title="Vendors" value={stats?.vendors || 0} description="Vendor profiles and contacts" icon="🏢" />
+          <StatCard
+            title="Vendors"
+            value={stats?.vendors || 0}
+            description="Vendor profiles and contacts"
+            icon="🏢"
+          />
           <StatCard
             title="Expenses"
             value={stats?.expenses || 0}
@@ -158,7 +190,11 @@ export default function Dashboard() {
         {/* Recent Items */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <RecentItemsCard title="Recent Pages" items={recentItems?.pages || []} type="page" />
-          <RecentItemsCard title="Recent Projects" items={recentItems?.projects || []} type="project" />
+          <RecentItemsCard
+            title="Recent Projects"
+            items={recentItems?.projects || []}
+            type="project"
+          />
           <RecentItemsCard title="Recent Tasks" items={recentItems?.tasks || []} type="task" />
         </div>
 
@@ -167,32 +203,32 @@ export default function Dashboard() {
           <FeatureCard
             title="Knowledge Workspace"
             description="Document management with categories, tags, versioning, and full-text search"
-            modules={["Pages", "Categories", "Tags", "History"]}
+            modules={['Pages', 'Categories', 'Tags', 'History']}
           />
           <FeatureCard
             title="HR & Expenses"
             description="Expense tracking with Concur integration, vendor rate cards, and FX handling"
-            modules={["Expenses", "Rate Cards", "Concur Mapping", "Export Queue"]}
+            modules={['Expenses', 'Rate Cards', 'Concur Mapping', 'Export Queue']}
           />
           <FeatureCard
             title="Project Management"
             description="Kanban boards, project wiki, task dependencies, and team collaboration"
-            modules={["Projects", "Tasks", "Wiki", "Kanban"]}
+            modules={['Projects', 'Tasks', 'Wiki', 'Kanban']}
           />
           <FeatureCard
             title="Accounting"
             description="Invoice management with templates, vendor documents, and knowledge links"
-            modules={["Invoices", "Templates", "Attachments", "Knowledge Links"]}
+            modules={['Invoices', 'Templates', 'Attachments', 'Knowledge Links']}
           />
           <FeatureCard
             title="Vendor Management"
             description="Centralized vendor profiles, documents, communications, and analytics"
-            modules={["Profiles", "Documents", "Communications", "Contacts"]}
+            modules={['Profiles', 'Documents', 'Communications', 'Contacts']}
           />
           <FeatureCard
             title="Analytics & Rollups"
             description="Cross-module metrics, computed fields, and Notion-like aggregations"
-            modules={["Metrics", "Rollups", "Dashboard", "Widgets"]}
+            modules={['Metrics', 'Rollups', 'Dashboard', 'Widgets']}
           />
         </div>
 
@@ -227,7 +263,7 @@ export default function Dashboard() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
 
 function StatCard({ title, value, description, icon }: any) {
@@ -244,7 +280,7 @@ function StatCard({ title, value, description, icon }: any) {
         <p className="text-xs text-slate-500">{description}</p>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 function RecentItemsCard({ title, items, type }: any) {
@@ -260,7 +296,9 @@ function RecentItemsCard({ title, items, type }: any) {
               <div key={item.id} className="p-2 bg-slate-50 rounded text-sm">
                 <p className="font-medium text-slate-900 truncate">{item.title || item.name}</p>
                 {item.status && <p className="text-xs text-slate-500 capitalize">{item.status}</p>}
-                {item.priority && <p className="text-xs text-slate-500 capitalize">Priority: {item.priority}</p>}
+                {item.priority && (
+                  <p className="text-xs text-slate-500 capitalize">Priority: {item.priority}</p>
+                )}
               </div>
             ))
           ) : (
@@ -269,7 +307,7 @@ function RecentItemsCard({ title, items, type }: any) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 function FeatureCard({ title, description, modules }: any) {
@@ -282,12 +320,15 @@ function FeatureCard({ title, description, modules }: any) {
       <CardContent>
         <div className="flex flex-wrap gap-2">
           {modules.map((module: string) => (
-            <span key={module} className="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-medium rounded-full">
+            <span
+              key={module}
+              className="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-medium rounded-full"
+            >
               {module}
             </span>
           ))}
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

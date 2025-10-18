@@ -1,0 +1,5 @@
+/docs/ @jgtolentino
+/app/** @web-senior
+/supabase/migrations/** @backend-senior
+/supabase/functions/** @backend-senior
+/packages/mobile/** @mobile-senior
