@@ -1,0 +1,13 @@
+{
+  "extends": ["next/core-web-vitals", "@typescript-eslint/recommended", "prettier"],
+  "plugins": ["@typescript-eslint"],
+  "rules": {
+    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-unused-expressions": "error",
+    "prefer-const": "error",
+    "no-var": "error",
+    "no-console": "warn"
+  },
+  "ignorePatterns": ["*.config.js", "*.config.ts", "node_modules/", ".next/"]
+}
