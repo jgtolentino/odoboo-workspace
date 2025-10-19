@@ -1,0 +1,71 @@
+name: chatgpt-plugin-server
+region: nyc
+
+services:
+  - name: api
+    github:
+      repo: jgtolentino/odoboo-workspace
+      branch: feature/chatgpt-plugin
+      deploy_on_push: true
+
+    source_dir: /chatgpt-plugin-server
+    dockerfile_path: Dockerfile
+
+    http_port: 3000
+
+    instance_count: 1
+    instance_size_slug: basic-xxs
+
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 10
+      period_seconds: 10
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
+
+    envs:
+      - key: NODE_ENV
+        value: "production"
+        scope: RUN_TIME
+
+      - key: HOST
+        value: "${APP_URL}"
+        scope: RUN_TIME
+
+      - key: GITHUB_APP_ID
+        value: "PENDING_APP_CREATION"
+        scope: RUN_TIME
+
+      - key: GITHUB_PRIVATE_KEY
+        value: "PENDING_APP_CREATION"
+        scope: RUN_TIME
+        type: SECRET
+
+      - key: PLUGIN_BEARER_TOKEN
+        value: "499ee4c43b225c95683505f246274e649391506c9a95da8c352ec2ae2ea7a23a"
+        scope: RUN_TIME
+        type: SECRET
+
+      - key: SUPABASE_URL
+        value: "https://xkxyvboeubffxxbebsll.supabase.co"
+        scope: RUN_TIME
+
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhreHl2Ym9ldWJmZnh4YmVic2xsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTY5Nzg4OCwiZXhwIjoyMDc1MjczODg4fQ.1YWsfKy-uHjv2QpLqfCyL2Ck0V9VCY-R3jwDy4ISndU"
+        scope: RUN_TIME
+        type: SECRET
+
+    cors:
+      allow_origins:
+        - exact: "https://chat.openai.com"
+        - exact: "https://chatgpt.com"
+      allow_methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+      allow_headers:
+        - "*"
+      allow_credentials: true
