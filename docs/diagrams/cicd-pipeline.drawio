@@ -1,0 +1,182 @@
+<mxfile host="app.diagrams.net" modified="2025-10-19T12:00:00.000Z" agent="Claude Code" version="24.7.17">
+  <diagram id="cicd-pipeline" name="CI/CD Pipeline Flow">
+    <mxGraphModel dx="1434" dy="844" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="CI/CD Pipeline - GitHub Actions Workflow" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="300" y="40" width="560" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Trigger Events -->
+        <mxCell id="triggers-box" value="Trigger Events" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;fontStyle=1;verticalAlign=top" vertex="1" parent="1">
+          <mxGeometry x="80" y="120" width="1000" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="trigger1" value="📝 Push to main" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="120" y="160" width="180" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="trigger2" value="🌿 Push to feature/**" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="340" y="160" width="180" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="trigger3" value="🔀 Pull Request → main" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="560" y="160" width="180" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="trigger4" value="🎯 Manual Dispatch" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="780" y="160" width="180" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Job 1: Database Migrations -->
+        <mxCell id="job1-box" value="Job 1: Database Migrations" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=14;fontStyle=1;verticalAlign=top" vertex="1" parent="1">
+          <mxGeometry x="80" y="280" width="480" height="200" as="geometry" />
+        </mxCell>
+
+        <mxCell id="job1-step1" value="1️⃣ Checkout repository&#xa;   actions/checkout@v4" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="120" y="320" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="job1-step2" value="2️⃣ Install PostgreSQL client&#xa;   sudo apt-get install postgresql-client" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="340" y="320" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="job1-step3" value="3️⃣ Apply migrations&#xa;   psql $POSTGRES_URL -f migrations/*.sql" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="120" y="380" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="job1-step4" value="4️⃣ Verify database&#xa;   SELECT COUNT(*) FROM app, app_category" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="340" y="380" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="job1-step5" value="5️⃣ Create summary&#xa;   echo \"## Database Migrations\" >> SUMMARY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="120" y="440" width="420" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Job 2: Frontend Build & Test -->
+        <mxCell id="job2-box" value="Job 2: Frontend Build &amp; Test" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;verticalAlign=top" vertex="1" parent="1">
+          <mxGeometry x="600" y="280" width="480" height="200" as="geometry" />
+        </mxCell>
+
+        <mxCell id="job2-step1" value="1️⃣ Checkout + Setup Node.js 20&#xa;   actions/checkout@v4 + setup-node@v4" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="640" y="320" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="job2-step2" value="2️⃣ Install dependencies&#xa;   npm ci (clean install)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="860" y="320" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="job2-step3" value="3️⃣ Type checking&#xa;   npx tsc --noEmit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="640" y="380" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="job2-step4" value="4️⃣ Linting&#xa;   npm run lint" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="860" y="380" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="job2-step5" value="5️⃣ Build application&#xa;   npm run build (Next.js production)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=left;spacingLeft=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="640" y="440" width="420" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Job 3: Deploy to Vercel -->
+        <mxCell id="job3-box" value="Job 3: Deploy to Vercel" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1;verticalAlign=top" vertex="1" parent="1">
+          <mxGeometry x="80" y="520" width="480" height="160" as="geometry" />
+        </mxCell>
+
+        <mxCell id="job3-depends" value="⚠️ Depends on: [frontend-test]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="120" y="550" width="200" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="job3-step1" value="1️⃣ Pull Vercel environment&#xa;   vercel pull --prod" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="120" y="590" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="job3-step2" value="2️⃣ Build artifacts&#xa;   vercel build --prod" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="340" y="590" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="job3-step3" value="3️⃣ Deploy to production&#xa;   vercel deploy --prebuilt --prod" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="120" y="640" width="420" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Job 4: Post-Deployment -->
+        <mxCell id="job4-box" value="Job 4: Post-Deployment Checks" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;fontStyle=1;verticalAlign=top" vertex="1" parent="1">
+          <mxGeometry x="600" y="520" width="480" height="160" as="geometry" />
+        </mxCell>
+
+        <mxCell id="job4-depends" value="⚠️ Depends on: [deploy]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="640" y="550" width="200" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="job4-step1" value="1️⃣ Health check&#xa;   curl https://.../apps (200 OK)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="640" y="590" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="job4-step2" value="2️⃣ Performance check&#xa;   Response time < 3 seconds" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="860" y="590" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="job4-step3" value="3️⃣ Create health summary&#xa;   echo \"## Health Status\" >> SUMMARY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="640" y="640" width="420" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Job 5: Notifications -->
+        <mxCell id="job5-box" value="Job 5: Send Notifications" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=14;fontStyle=1;verticalAlign=top" vertex="1" parent="1">
+          <mxGeometry x="80" y="720" width="1000" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="job5-depends" value="⚠️ Depends on: [database, deploy, post-deploy]&#xa;Always runs: if: always()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="120" y="750" width="300" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="job5-success" value="✅ Success notification&#xa;   All checks passed + Production URL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="460" y="750" width="280" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="job5-failure" value="❌ Failure notification&#xa;   Deployment failed + Check logs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=left;spacingLeft=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="780" y="750" width="280" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Connections: Triggers to Jobs -->
+        <mxCell id="conn1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#82b366;" edge="1" parent="1" source="triggers-box" target="job1-box">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="conn2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#6c8ebf;" edge="1" parent="1" source="triggers-box" target="job2-box">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Connections: Job dependencies -->
+        <mxCell id="conn3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#9673a6;" edge="1" parent="1" source="job2-box" target="job3-box">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="conn3-label" value="needs" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontStyle=1" vertex="1" connectable="0" parent="conn3">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="conn4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#9673a6;" edge="1" parent="1" source="job3-box" target="job4-box">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="conn4-label" value="needs" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontStyle=1" vertex="1" connectable="0" parent="conn4">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="conn5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;dashed=1;" edge="1" parent="1" source="job1-box" target="job5-box">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="conn6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;dashed=1;" edge="1" parent="1" source="job4-box" target="job5-box">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,228 @@
+<mxfile host="app.diagrams.net" modified="2025-10-19T12:00:00.000Z" agent="Claude Code" version="24.7.17">
+  <diagram id="system-architecture" name="System Architecture">
+    <mxGraphModel dx="1434" dy="844" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="OdoBoo Workspace - System Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="340" y="40" width="480" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Frontend Layer -->
+        <mxCell id="frontend-layer" value="Frontend Layer" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="80" y="120" width="1000" height="160" as="geometry" />
+        </mxCell>
+
+        <!-- Vercel Deployment -->
+        <mxCell id="vercel" value="Vercel&#xa;(Production Hosting)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="120" y="160" width="200" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Next.js App -->
+        <mxCell id="nextjs" value="Next.js 15 App&#xa;(App Router)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="360" y="160" width="180" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- React Components -->
+        <mxCell id="components" value="React Components&#xa;- Apps Catalog&#xa;- Notion Workspace&#xa;- Task Manager" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="580" y="160" width="180" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Client Libraries -->
+        <mxCell id="client-libs" value="Client Libraries&#xa;- Supabase Client&#xa;- Tailwind CSS&#xa;- shadcn/ui" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="800" y="160" width="180" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Backend Layer -->
+        <mxCell id="backend-layer" value="Backend Layer" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=14;fontStyle=1;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="80" y="320" width="1000" height="200" as="geometry" />
+        </mxCell>
+
+        <!-- Supabase PostgreSQL -->
+        <mxCell id="supabase-db" value="Supabase PostgreSQL&#xa;(spdtwktxdalcfigzeqrz)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="120" y="360" width="220" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Database Tables -->
+        <mxCell id="db-tables" value="Database Tables&#xa;- app_category&#xa;- app&#xa;- app_install&#xa;- app_review&#xa;- knowledge_pages&#xa;- content_blocks&#xa;- companies" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="120" y="450" width="220" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- RLS Policies -->
+        <mxCell id="rls" value="Row Level Security&#xa;- Company-scoped policies&#xa;- User-based access control&#xa;- JWT validation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="380" y="360" width="200" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Database Functions -->
+        <mxCell id="db-functions" value="PL/pgSQL Functions&#xa;- update_app_rating()&#xa;- increment_install_count()&#xa;- export_page_as_json()&#xa;- import_page_from_json()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="380" y="450" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Triggers -->
+        <mxCell id="triggers" value="Database Triggers&#xa;- Auto-update ratings on review&#xa;- Auto-increment install count&#xa;- Updated_at timestamp" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="620" y="360" width="200" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- pg_cron -->
+        <mxCell id="pgcron" value="pg_cron Jobs&#xa;- Scheduled tasks&#xa;- Data cleanup&#xa;- Analytics updates" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="620" y="450" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Edge Functions -->
+        <mxCell id="edge-functions" value="Supabase Edge Functions&#xa;(Deno Runtime)&#xa;- API endpoints&#xa;- Server-side logic&#xa;- Third-party integrations" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="860" y="360" width="180" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- CI/CD Layer -->
+        <mxCell id="cicd-layer" value="CI/CD &amp; Automation Layer" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;fontStyle=1;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="80" y="560" width="1000" height="180" as="geometry" />
+        </mxCell>
+
+        <!-- GitHub Actions -->
+        <mxCell id="github-actions" value="GitHub Actions&#xa;CI/CD Pipeline" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="120" y="600" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Database Migrations Job -->
+        <mxCell id="job-db" value="Job 1: Database&#xa;- Apply migrations&#xa;- Verify tables&#xa;- Health checks" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="360" y="600" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Frontend Test Job -->
+        <mxCell id="job-test" value="Job 2: Frontend&#xa;- Type checking&#xa;- Linting&#xa;- Build" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="520" y="600" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Deploy Job -->
+        <mxCell id="job-deploy" value="Job 3: Deploy&#xa;- Vercel production&#xa;- Environment vars&#xa;- DNS update" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="680" y="600" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Health Check Job -->
+        <mxCell id="job-health" value="Job 4: Health&#xa;- Endpoint tests&#xa;- Performance&#xa;- Validation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="840" y="600" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Workflow Triggers -->
+        <mxCell id="triggers-ci" value="Triggers&#xa;- Push to main/feature&#xa;- Pull requests&#xa;- Manual dispatch&#xa;- Schedule (cron)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="120" y="670" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Secrets -->
+        <mxCell id="secrets" value="GitHub Secrets&#xa;- POSTGRES_URL&#xa;- VERCEL_TOKEN&#xa;- SUPABASE_ANON_KEY&#xa;- SUPABASE_SERVICE_ROLE_KEY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="360" y="670" width="300" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Notifications -->
+        <mxCell id="notifications" value="Notifications&#xa;- GitHub summary&#xa;- Email alerts&#xa;- Deployment status" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="700" y="670" width="280" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Connections: Frontend to Backend -->
+        <mxCell id="conn1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#6c8ebf;" edge="1" parent="1" source="vercel" target="supabase-db">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="conn1-label" value="HTTPS&#xa;Connection Pooler" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;" vertex="1" connectable="0" parent="conn1">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="conn2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#82b366;" edge="1" parent="1" source="nextjs" target="rls">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="conn2-label" value="Supabase&#xa;Client SDK" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;" vertex="1" connectable="0" parent="conn2">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="conn3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#d79b00;" edge="1" parent="1" source="components" target="edge-functions">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="conn3-label" value="API Calls" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;" vertex="1" connectable="0" parent="conn3">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Connections: Database to Functions/Triggers -->
+        <mxCell id="conn4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;strokeColor=#666666;dashed=1;" edge="1" parent="1" source="db-tables" target="db-functions">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="conn5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;strokeColor=#666666;dashed=1;" edge="1" parent="1" source="supabase-db" target="triggers">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Connections: CI/CD to Deployment -->
+        <mxCell id="conn6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#9673a6;" edge="1" parent="1" source="github-actions" target="vercel">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="conn6-label" value="Deploy" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;" vertex="1" connectable="0" parent="conn6">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="conn7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#9673a6;" edge="1" parent="1" source="job-db" target="supabase-db">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="conn7-label" value="Migrations" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;" vertex="1" connectable="0" parent="conn7">
+          <mxGeometry x="-0.1" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Legend -->
+        <mxCell id="legend" value="Legend" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;fontStyle=1;verticalAlign=top;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="1120" y="120" width="200" height="200" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="150" width="30" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend1-text" value="Frontend Layer" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="1180" y="145" width="120" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="180" width="30" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend2-text" value="Backend Layer" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="1180" y="175" width="120" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="210" width="30" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend3-text" value="CI/CD Layer" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="1180" y="205" width="120" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#000000;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1140" y="250" as="sourcePoint" />
+            <mxPoint x="1170" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend4-text" value="Data Flow" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="1180" y="235" width="120" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#666666;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1140" y="280" as="sourcePoint" />
+            <mxPoint x="1170" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend5-text" value="Triggers/Events" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="1180" y="265" width="120" height="30" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
