@@ -1,0 +1,29 @@
+# Build outputs
+dist/
+*.vsix
+
+# Dependencies
+node_modules/
+
+# IDE
+.vscode/
+.vscode-test/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test coverage
+coverage/
+
+# Playwright
+.playwright/
+playwright-report/
+test-results/
+
+# Temporary files
+*.tmp
+.snapshots/

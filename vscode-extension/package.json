@@ -1,0 +1,200 @@
+{
+  "name": "odoo-workspace-supabase-ops",
+  "displayName": "Odoo Workspace (Supabase-Ops)",
+  "description": "Odoo development tools with Supabase, Vercel, and DigitalOcean deployment monitoring",
+  "publisher": "keenect",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.92.0"
+  },
+  "categories": [
+    "Other",
+    "Testing",
+    "Debuggers"
+  ],
+  "keywords": [
+    "odoo",
+    "supabase",
+    "vercel",
+    "deployment",
+    "monitoring"
+  ],
+  "activationEvents": [
+    "onCommand:odoo.launch",
+    "onCommand:odoo.rpcConsole",
+    "onCommand:db.schemaGuard",
+    "onCommand:qa.snapshot",
+    "onCommand:test.impact",
+    "onCommand:platform.checkStatus"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "odoo.launch",
+        "title": "Odoo: Launch Dev Server",
+        "icon": "$(play)"
+      },
+      {
+        "command": "odoo.rpcConsole",
+        "title": "Odoo: Open RPC Console",
+        "icon": "$(terminal)"
+      },
+      {
+        "command": "db.schemaGuard",
+        "title": "DB: Run Schema Guard",
+        "icon": "$(database)"
+      },
+      {
+        "command": "qa.snapshot",
+        "title": "QA: Visual Snapshot",
+        "icon": "$(camera)"
+      },
+      {
+        "command": "test.impact",
+        "title": "Tests: Run Impacted",
+        "icon": "$(beaker)"
+      },
+      {
+        "command": "platform.checkStatus",
+        "title": "Platform: Check Deployment Status",
+        "icon": "$(cloud)"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Odoo Workspace",
+      "properties": {
+        "odoo.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Python executable for Odoo"
+        },
+        "odoo.bin": {
+          "type": "string",
+          "default": "odoo",
+          "description": "Path to odoo-bin"
+        },
+        "odoo.addonsPath": {
+          "type": "string",
+          "default": "addons",
+          "description": "Addons directory path"
+        },
+        "odoo.config": {
+          "type": "string",
+          "default": "odoo.conf",
+          "description": "Odoo configuration file path"
+        },
+        "supabase.projectRef": {
+          "type": "string",
+          "default": "",
+          "description": "Supabase project reference ID"
+        },
+        "supabase.url": {
+          "type": "string",
+          "default": "",
+          "description": "Supabase project URL"
+        },
+        "supabase.serviceRoleKey": {
+          "type": "string",
+          "default": "",
+          "description": "Supabase service role key (from environment)"
+        },
+        "supabase.connectionString": {
+          "type": "string",
+          "default": "",
+          "description": "PostgreSQL connection string"
+        },
+        "vercel.token": {
+          "type": "string",
+          "default": "",
+          "description": "Vercel API token (from environment)"
+        },
+        "vercel.projectId": {
+          "type": "string",
+          "default": "",
+          "description": "Vercel project ID"
+        },
+        "vercel.teamId": {
+          "type": "string",
+          "default": "",
+          "description": "Vercel team ID"
+        },
+        "github.token": {
+          "type": "string",
+          "default": "",
+          "description": "GitHub personal access token (from environment)"
+        },
+        "github.repo": {
+          "type": "string",
+          "default": "",
+          "description": "GitHub repository (owner/repo)"
+        },
+        "digitalocean.token": {
+          "type": "string",
+          "default": "",
+          "description": "DigitalOcean API token (from environment)"
+        },
+        "digitalocean.appId": {
+          "type": "string",
+          "default": "",
+          "description": "DigitalOcean App Platform app ID"
+        },
+        "qa.baseUrl": {
+          "type": "string",
+          "default": "http://localhost:8069",
+          "description": "Odoo web URL for QA snapshots"
+        },
+        "qa.visualApiUrl": {
+          "type": "string",
+          "default": "http://localhost:8080",
+          "description": "Visual QA API URL (PaddleOCR-VL service)"
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "odoo-workspace",
+          "title": "Odoo Workspace",
+          "icon": "$(database)"
+        }
+      ]
+    },
+    "views": {
+      "odoo-workspace": [
+        {
+          "id": "deploymentStatus",
+          "name": "Deployment Status"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p .",
+    "watch": "tsc -w -p .",
+    "pretest": "npm run compile",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package",
+    "postinstall": "playwright install --with-deps chromium"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.13",
+    "@types/pg": "8.15.5",
+    "@types/vscode": "^1.92.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "@vscode/vsce": "^2.29.0",
+    "eslint": "^8.57.0",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "@octokit/rest": "^20.0.2",
+    "@playwright/test": "^1.48.2",
+    "@supabase/supabase-js": "^2.39.0",
+    "image-ssim": "^0.2.0",
+    "jsondiffpatch": "^0.6.0",
+    "pg": "^8.12.0",
+    "playwright": "^1.48.2"
+  }
+}
