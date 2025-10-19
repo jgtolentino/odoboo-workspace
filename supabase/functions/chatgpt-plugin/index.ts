@@ -1,12 +1,10 @@
 // ChatGPT Plugin Server as Supabase Edge Function
-// Handles GitHub operations via GitHub App authentication
+// Handles GitHub operations via Personal Access Token
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createAppAuth } from "https://esm.sh/@octokit/auth-app@6.0.0"
 import { Octokit } from "https://esm.sh/@octokit/rest@20.0.0"
 
-const GITHUB_APP_ID = Deno.env.get('GITHUB_APP_ID') || 'PENDING'
-const GITHUB_PRIVATE_KEY = Deno.env.get('GITHUB_PRIVATE_KEY') || 'PENDING'
+const GITHUB_TOKEN = Deno.env.get('GITHUB_TOKEN')
 const PLUGIN_BEARER_TOKEN = Deno.env.get('PLUGIN_BEARER_TOKEN')
 
 // CORS headers for ChatGPT
@@ -36,28 +34,9 @@ function requireAuth(req: Request): Response | null {
   return null
 }
 
-// Get Octokit for a specific repository
-async function getOctokitForRepo(owner: string, repo: string): Promise<Octokit> {
-  const auth = createAppAuth({
-    appId: GITHUB_APP_ID,
-    privateKey: GITHUB_PRIVATE_KEY,
-  })
-
-  const appAuth = await auth({ type: 'app' })
-  const octokitApp = new Octokit({ auth: appAuth.token })
-
-  const installResp = await octokitApp.rest.apps.getRepoInstallation({
-    owner,
-    repo
-  })
-  const installationId = installResp.data.id
-
-  const installationAuth = await auth({
-    type: 'installation',
-    installationId
-  })
-
-  return new Octokit({ auth: installationAuth.token })
+// Get Octokit instance with personal access token
+function getOctokit(): Octokit {
+  return new Octokit({ auth: GITHUB_TOKEN })
 }
 
 serve(async (req) => {
@@ -69,22 +48,24 @@ serve(async (req) => {
   const url = new URL(req.url)
   const path = url.pathname
 
+  console.log('Request path:', path)
+
   try {
-    // Health check
-    if (path === '/health') {
+    // Health check (no auth required)
+    if (path === '/health' || path.endsWith('/health')) {
       return new Response(
         JSON.stringify({
           status: 'ok',
           timestamp: new Date().toISOString(),
-          github_app_id: GITHUB_APP_ID,
+          github_token: GITHUB_TOKEN ? 'configured' : 'missing',
           auth_configured: !!PLUGIN_BEARER_TOKEN
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Plugin manifest
-    if (path === '/.well-known/ai-plugin.json') {
+    // Plugin manifest (no auth required)
+    if (path === '/.well-known/ai-plugin.json' || path.endsWith('/ai-plugin.json')) {
       const manifest = {
         schema_version: 'v1',
         name_for_human: 'GitHub & Infrastructure Manager',
@@ -108,8 +89,8 @@ serve(async (req) => {
       )
     }
 
-    // OpenAPI spec
-    if (path === '/.well-known/openapi.yaml') {
+    // OpenAPI spec (no auth required)
+    if (path === '/.well-known/openapi.yaml' || path.endsWith('/openapi.yaml')) {
       const openapi = `
 openapi: 3.0.1
 info:
@@ -194,7 +175,7 @@ paths:
       const [_, owner, repo, filePath] = match
 
       if (req.method === 'GET') {
-        const octokit = await getOctokitForRepo(owner, repo)
+        const octokit = getOctokit()
         const response = await octokit.rest.repos.getContent({
           owner,
           repo,
@@ -236,7 +217,7 @@ paths:
         const body = await req.json()
         const { message, content, branch, sha } = body
 
-        const octokit = await getOctokitForRepo(owner, repo)
+        const octokit = getOctokit()
         const contentB64 = btoa(content)
 
         const params: any = {
