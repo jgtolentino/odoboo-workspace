@@ -160,6 +160,80 @@ Professional Draw.io diagrams for OdoBoo Workspace technical documentation.
 
 ---
 
+### 4. AI Chat Architecture (`ai-chat-architecture.drawio`)
+**Overview**: AI chat implementation with Supabase + OpenAI (alternative to Azure AI Foundry)
+
+**Layers**:
+- **User Layer**: Browser → Vercel Edge Network → Security
+- **Frontend Layer**: Next.js 15 → Chat UI → Supabase Client SDK
+- **Backend Layer**: Edge Functions (Chat Agent, Embedding, Auth, File Processor)
+- **AI/ML Layer**: OpenAI API direct ($10/mo vs $20/mo Azure OpenAI)
+- **Data Layer**: PostgreSQL + pg_vector (vector embeddings)
+- **Storage Layer**: Supabase Storage + RLS + Backups
+
+**Well-Architected Pillars**:
+- **Reliability**: Vercel Edge Network (300+ locations), automated backups
+- **Security**: RLS policies, JWT validation, GitHub Secrets + Supabase Vault
+- **Cost Optimization**: $10/mo vs $100/mo Azure (90% savings)
+- **Operational Excellence**: 5-job CI/CD pipeline, Vercel Analytics, Supabase logs
+- **Performance Efficiency**: Edge caching, connection pooler, <3s load time
+
+**Use Cases**:
+- AI chat feature implementation
+- Azure → Supabase migration planning
+- Well-Architected Framework application
+- Cost optimization analysis
+
+---
+
+### 5. Medallion Analytics Architecture (`medallion-architecture.drawio`)
+**Overview**: Azure Databricks → Supabase analytics migration (Bronze/Silver/Gold layers)
+
+**Architecture Layers**:
+1. **Bronze Layer (Raw Data)**:
+   - Supabase Realtime (event ingestion)
+   - Webhooks (external data)
+   - Raw event tables (events_raw, api_logs_raw, user_actions_raw, transactions_raw)
+
+2. **Silver Layer (Cleaned Data)**:
+   - Edge Functions (data transformation)
+   - Validation logic (quality checks)
+   - Cleaned data tables (events_clean, api_logs_clean, user_sessions, transactions_validated)
+
+3. **Gold Layer (Aggregated Analytics)**:
+   - Materialized views (pre-aggregated metrics)
+   - pg_cron jobs (scheduled updates)
+   - Analytics tables (daily_metrics, user_cohorts, revenue_summary, kpi_dashboard)
+
+**Azure Databricks vs Supabase Comparison**:
+- Data Storage: Delta Lake ($200/mo) → PostgreSQL ($0/mo)
+- Event Ingestion: Azure Event Hubs ($100/mo) → Supabase Realtime ($0/mo)
+- Data Transformation: Azure Data Factory ($80/mo) → Edge Functions + pg_cron ($0/mo)
+- Analytics Notebooks: Databricks ($150/mo) → Edge Functions + SQL ($0/mo)
+- Data Governance: Unity Catalog ($50/mo) → PostgreSQL Schemas + RLS ($0/mo)
+- ML Lifecycle: MLflow ($100/mo) → Custom ML Pipeline ($10/mo)
+- Visualization: Power BI + Synapse ($120/mo) → Metabase/Draxlr ($0/mo)
+- **TOTAL**: $800/mo → $10/mo (98.75% savings)
+
+**Key Benefits**:
+- ✅ 98.75% cost savings ($800/mo → $10/mo)
+- ✅ Simpler architecture (PostgreSQL + Edge Functions vs 7 Azure services)
+- ✅ Faster development (unified platform, single API)
+- ✅ Built-in security (RLS policies, JWT auth)
+- ✅ Real-time capabilities (CDC, WebSockets)
+- ✅ Zero DevOps overhead (managed service)
+- ✅ Open-source foundation (avoid vendor lock-in)
+
+**Use Cases**:
+- Product analytics (user behavior, feature adoption, retention)
+- Business intelligence (revenue, KPIs, dashboards)
+- ML pipelines (feature engineering, model training, inference)
+- Data science (exploratory analysis, statistical modeling)
+- Real-time monitoring (system health, error tracking, alerts)
+- Customer data platform (360° view, segmentation, personalization)
+
+---
+
 ## 🛠️ How to Use These Diagrams
 
 ### Opening in Draw.io Desktop
@@ -206,7 +280,9 @@ docs/diagrams/
 ├── README.md                      # This file
 ├── system-architecture.drawio     # Complete system overview
 ├── database-schema.drawio         # Apps catalog ERD
-└── cicd-pipeline.drawio          # GitHub Actions workflow
+├── cicd-pipeline.drawio          # GitHub Actions workflow
+├── ai-chat-architecture.drawio   # AI chat with Supabase + OpenAI
+└── medallion-architecture.drawio # Analytics architecture (Bronze/Silver/Gold)
 ```
 
 ## 🎨 Color Coding
@@ -231,6 +307,20 @@ docs/diagrams/
 - 🔵 Blue (#dae8fc): Frontend operations
 - 🟣 Purple (#e1d5e7): Deployment steps
 - ⚪ Gray (#f5f5f5): Notifications and reports
+
+**AI Chat Architecture**:
+- 🔵 Blue (#dae8fc): User and Frontend layers
+- 🟢 Green (#d5e8d4): Backend Edge Functions
+- 🟣 Purple (#e1d5e7): AI/ML layer
+- 🟡 Yellow (#fff2cc): Data layer (PostgreSQL + pg_vector)
+- 🔴 Red (#f8cecc): Storage layer
+
+**Medallion Analytics Architecture**:
+- 🟡 Yellow (#fff2cc): Bronze Layer (Raw Data)
+- 🟢 Green (#d5e8d4): Silver Layer (Cleaned Data)
+- 🔵 Blue (#dae8fc): Gold Layer (Aggregated Analytics)
+- ⚪ Gray (#f5f5f5): Comparison table background
+- 🟢 Green (#d5e8d4): Cost savings highlights
 
 ## 🔄 Updating Diagrams
 
@@ -258,6 +348,10 @@ docs(diagrams): Update system architecture - add new Edge Function
 - **Database Migrations**: `supabase/migrations/`
 - **CI/CD Workflows**: `.github/workflows/`
 - **Deployment Guide**: `docs/NOTION_WORKSPACE_DEPLOYMENT.md`
+- **Well-Architected Assessment**: `docs/WELL_ARCHITECTED_ASSESSMENT.md`
+- **Analytics Architecture**: `docs/ANALYTICS_ARCHITECTURE.md`
+- **Division of Labor**: `docs/DIVISION_OF_LABOR.md`
+- **Sample Page Guide**: `docs/SAMPLE_PAGE_GUIDE.md`
 
 ---
 

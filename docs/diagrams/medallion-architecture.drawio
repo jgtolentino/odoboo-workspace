@@ -1,0 +1,228 @@
+<mxfile host="app.diagrams.net" modified="2025-10-19T00:00:00.000Z" agent="Claude Code" version="24.7.17">
+  <diagram name="Medallion Architecture" id="medallion-arch">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" background="#ffffff">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="Medallion Analytics Architecture&#xa;Supabase PostgreSQL + Edge Functions" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="800" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- BRONZE LAYER -->
+        <mxCell id="bronze-layer" value="BRONZE LAYER (Raw Data)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=16;fontStyle=1;align=center;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="100" y="120" width="400" height="280" as="geometry" />
+        </mxCell>
+
+        <!-- Bronze Components -->
+        <mxCell id="bronze-realtime" value="Supabase Realtime&#xa;(Event Ingestion)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="130" y="160" width="160" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="bronze-webhooks" value="Webhooks&#xa;(External Data)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="310" y="160" width="160" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="bronze-tables" value="Raw Event Tables&#xa;&#xa;• events_raw&#xa;• api_logs_raw&#xa;• user_actions_raw&#xa;• transactions_raw" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="130" y="240" width="340" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- SILVER LAYER -->
+        <mxCell id="silver-layer" value="SILVER LAYER (Cleaned Data)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=16;fontStyle=1;align=center;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="600" y="120" width="400" height="280" as="geometry" />
+        </mxCell>
+
+        <!-- Silver Components -->
+        <mxCell id="silver-functions" value="Edge Functions&#xa;(Data Transformation)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d4edda;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="630" y="160" width="160" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="silver-validation" value="Validation Logic&#xa;(Quality Checks)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d4edda;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="810" y="160" width="160" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="silver-tables" value="Cleaned Data Tables&#xa;&#xa;• events_clean&#xa;• api_logs_clean&#xa;• user_sessions&#xa;• transactions_validated" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d4edda;strokeColor=#82b366;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="630" y="240" width="340" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- GOLD LAYER -->
+        <mxCell id="gold-layer" value="GOLD LAYER (Aggregated Analytics)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=16;fontStyle=1;align=center;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="120" width="400" height="280" as="geometry" />
+        </mxCell>
+
+        <!-- Gold Components -->
+        <mxCell id="gold-views" value="Materialized Views&#xa;(Pre-aggregated Metrics)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cfe2ff;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="1130" y="160" width="160" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="gold-cron" value="pg_cron Jobs&#xa;(Scheduled Updates)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cfe2ff;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="1310" y="160" width="160" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="gold-tables" value="Analytics Tables&#xa;&#xa;• daily_metrics&#xa;• user_cohorts&#xa;• revenue_summary&#xa;• kpi_dashboard" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cfe2ff;strokeColor=#6c8ebf;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1130" y="240" width="340" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- Data Flow Arrows -->
+        <mxCell id="flow-bronze-silver" value="ETL Transform" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#82b366;fontSize=14;fontStyle=1;" edge="1" parent="1" source="bronze-layer" target="silver-layer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="flow-silver-gold" value="Aggregate" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;" edge="1" parent="1" source="silver-layer" target="gold-layer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- COMPARISON TABLE -->
+        <mxCell id="comparison-title" value="Azure Databricks vs Supabase Analytics" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="100" y="450" width="1400" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Comparison Table Container -->
+        <mxCell id="comparison-table" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="100" y="500" width="1400" height="480" as="geometry" />
+        </mxCell>
+
+        <!-- Table Headers -->
+        <mxCell id="header-component" value="Component" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#666666;strokeColor=#666666;fontColor=#ffffff;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="120" y="520" width="300" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="header-databricks" value="Azure Databricks" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#666666;strokeColor=#666666;fontColor=#ffffff;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="440" y="520" width="400" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="header-supabase" value="Supabase Equivalent" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#666666;strokeColor=#666666;fontColor=#ffffff;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="860" y="520" width="400" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="header-cost" value="Cost Comparison" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#666666;strokeColor=#666666;fontColor=#ffffff;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="1280" y="520" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Row 1: Data Storage -->
+        <mxCell id="row1-component" value="Data Storage" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#666666;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="120" y="560" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row1-databricks" value="Delta Lake&#xa;(ACID transactions, versioning)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="560" width="400" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row1-supabase" value="PostgreSQL&#xa;(Transactions, point-in-time recovery)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="860" y="560" width="400" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row1-cost" value="$200/mo vs $0/mo&#xa;(Free tier)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="1280" y="560" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Row 2: Event Ingestion -->
+        <mxCell id="row2-component" value="Event Ingestion" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#666666;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="120" y="610" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row2-databricks" value="Azure Event Hubs&#xa;(Real-time event streaming)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="610" width="400" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row2-supabase" value="Supabase Realtime&#xa;(WebSocket events, CDC)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="860" y="610" width="400" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row2-cost" value="$100/mo vs $0/mo&#xa;(Included)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="1280" y="610" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Row 3: Data Transformation -->
+        <mxCell id="row3-component" value="Data Transformation" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#666666;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="120" y="660" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row3-databricks" value="Azure Data Factory&#xa;(ETL pipelines, orchestration)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="660" width="400" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row3-supabase" value="Edge Functions + pg_cron&#xa;(Deno runtime, scheduled jobs)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="860" y="660" width="400" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row3-cost" value="$80/mo vs $0/mo&#xa;(Included)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="1280" y="660" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Row 4: Analytics Notebooks -->
+        <mxCell id="row4-component" value="Analytics Notebooks" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#666666;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="120" y="710" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row4-databricks" value="Databricks Notebooks&#xa;(Python, SQL, Scala)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="710" width="400" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row4-supabase" value="Edge Functions + SQL&#xa;(TypeScript, PostgreSQL)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="860" y="710" width="400" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row4-cost" value="$150/mo vs $0/mo&#xa;(Included)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="1280" y="710" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Row 5: Data Governance -->
+        <mxCell id="row5-component" value="Data Governance" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#666666;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="120" y="760" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row5-databricks" value="Unity Catalog&#xa;(Metadata, lineage, access control)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="760" width="400" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row5-supabase" value="PostgreSQL Schemas + RLS&#xa;(Row-level security, policies)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="860" y="760" width="400" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row5-cost" value="$50/mo vs $0/mo&#xa;(Included)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="1280" y="760" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Row 6: ML Lifecycle -->
+        <mxCell id="row6-component" value="ML Lifecycle" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#666666;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="120" y="810" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row6-databricks" value="MLflow&#xa;(Experiment tracking, model registry)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="810" width="400" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row6-supabase" value="Custom ML Pipeline&#xa;(pg_vector, OpenAI API, tracking tables)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="860" y="810" width="400" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row6-cost" value="$100/mo vs $10/mo&#xa;(OpenAI direct)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="1280" y="810" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Row 7: Visualization -->
+        <mxCell id="row7-component" value="Visualization" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#666666;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="120" y="860" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row7-databricks" value="Power BI + Azure Synapse&#xa;(Enterprise BI dashboards)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="860" width="400" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row7-supabase" value="Metabase / Draxlr&#xa;(Open-source BI, direct PostgreSQL)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="860" y="860" width="400" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row7-cost" value="$120/mo vs $0/mo&#xa;(Self-hosted)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="1280" y="860" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Row 8: TOTAL COST -->
+        <mxCell id="row8-component" value="TOTAL MONTHLY COST" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#666666;strokeColor=#666666;fontColor=#ffffff;fontSize=14;fontStyle=1;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="120" y="910" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row8-databricks" value="Azure Databricks Stack" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="440" y="910" width="400" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row8-supabase" value="Supabase Analytics Stack" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="860" y="910" width="400" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="row8-cost" value="$800/mo vs $10/mo&#xa;98.75% SAVINGS" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="1280" y="910" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Key Benefits Box -->
+        <mxCell id="benefits-box" value="KEY BENEFITS OF SUPABASE ANALYTICS STACK&#xa;&#xa;✅ 98.75% cost savings ($800/mo → $10/mo)&#xa;✅ Simpler architecture (PostgreSQL + Edge Functions vs 7 Azure services)&#xa;✅ Faster development (unified platform, single API)&#xa;✅ Built-in security (RLS policies, JWT auth)&#xa;✅ Real-time capabilities (CDC, WebSockets)&#xa;✅ Zero DevOps overhead (managed service)&#xa;✅ Open-source foundation (avoid vendor lock-in)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;align=left;spacingLeft=20;verticalAlign=top;spacingTop=10;fontStyle=0" vertex="1" parent="1">
+          <mxGeometry x="100" y="1020" width="700" height="160" as="geometry" />
+        </mxCell>
+
+        <!-- Use Cases Box -->
+        <mxCell id="usecases-box" value="MEDALLION ARCHITECTURE USE CASES&#xa;&#xa;🔹 Product Analytics: User behavior, feature adoption, retention&#xa;🔹 Business Intelligence: Revenue, KPIs, dashboards&#xa;🔹 ML Pipelines: Feature engineering, model training, inference&#xa;🔹 Data Science: Exploratory analysis, statistical modeling&#xa;🔹 Real-time Monitoring: System health, error tracking, alerts&#xa;🔹 Customer Data Platform: 360° view, segmentation, personalization" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=left;spacingLeft=20;verticalAlign=top;spacingTop=10;fontStyle=0" vertex="1" parent="1">
+          <mxGeometry x="820" y="1020" width="680" height="160" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
