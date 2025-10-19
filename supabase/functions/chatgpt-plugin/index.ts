@@ -1,17 +1,41 @@
 // ChatGPT Plugin Server as Supabase Edge Function
-// Handles GitHub operations via Personal Access Token
+// Handles GitHub operations with Vault-backed secret management
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { Octokit } from "https://esm.sh/@octokit/rest@20.0.0"
-
-const GITHUB_TOKEN = Deno.env.get('GITHUB_TOKEN')
-const PLUGIN_BEARER_TOKEN = Deno.env.get('PLUGIN_BEARER_TOKEN')
+import { getSecret, getSecrets } from "./vault-client.ts"
 
 // CORS headers for ChatGPT
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+}
+
+// Lazy-loaded secrets cache
+let GITHUB_TOKEN: string | null = null
+let PLUGIN_BEARER_TOKEN: string | null = null
+
+/**
+ * Initialize secrets from Vault with fallback to env vars
+ */
+async function initializeSecrets(): Promise<void> {
+  try {
+    console.log('🔐 Loading secrets from Vault...')
+
+    const secrets = await getSecrets(['github_token', 'plugin_bearer_token'])
+
+    GITHUB_TOKEN = secrets.github_token
+    PLUGIN_BEARER_TOKEN = secrets.plugin_bearer_token
+
+    console.log('✅ Secrets loaded from Vault')
+  } catch (err) {
+    console.warn('⚠️  Vault unavailable, using environment variables:', err.message)
+
+    // Fallback to environment variables
+    GITHUB_TOKEN = Deno.env.get('GITHUB_TOKEN') || null
+    PLUGIN_BEARER_TOKEN = Deno.env.get('PLUGIN_BEARER_TOKEN') || null
+  }
 }
 
 // Auth middleware
@@ -36,6 +60,9 @@ function requireAuth(req: Request): Response | null {
 
 // Get Octokit instance with personal access token
 function getOctokit(): Octokit {
+  if (!GITHUB_TOKEN) {
+    throw new Error('GitHub token not configured')
+  }
   return new Octokit({ auth: GITHUB_TOKEN })
 }
 
@@ -53,15 +80,26 @@ serve(async (req) => {
   try {
     // Health check (no auth required)
     if (path === '/health' || path.endsWith('/health')) {
+      // Initialize secrets on first health check if not already loaded
+      if (!GITHUB_TOKEN || !PLUGIN_BEARER_TOKEN) {
+        await initializeSecrets()
+      }
+
       return new Response(
         JSON.stringify({
           status: 'ok',
           timestamp: new Date().toISOString(),
           github_token: GITHUB_TOKEN ? 'configured' : 'missing',
-          auth_configured: !!PLUGIN_BEARER_TOKEN
+          auth_configured: !!PLUGIN_BEARER_TOKEN,
+          secret_source: 'vault'
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
+    }
+
+    // Initialize secrets if not already loaded
+    if (!GITHUB_TOKEN || !PLUGIN_BEARER_TOKEN) {
+      await initializeSecrets()
     }
 
     // Plugin manifest (no auth required)

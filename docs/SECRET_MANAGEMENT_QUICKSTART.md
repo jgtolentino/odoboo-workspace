@@ -1,0 +1,385 @@
+# Secret Management Quick Start
+
+**Get robust secret management running in 5 minutes**
+
+## TL;DR
+
+```bash
+# 1. Apply Vault migration
+cd /Users/tbwa/Documents/GitHub/odoboo-workspace-temp
+supabase db push
+
+# 2. Migrate secrets to Vault
+./scripts/migrate-secrets-to-vault.sh
+
+# 3. Deploy Edge Function with Vault support
+supabase functions deploy chatgpt-plugin --project-ref spdtwktxdalcfigzeqrz
+
+# 4. Verify
+curl https://spdtwktxdalcfigzeqrz.supabase.co/functions/v1/chatgpt-plugin/health | jq
+# Should show: "secret_source": "vault"
+```
+
+## What You Get
+
+✅ **Supabase Vault** - Encrypted secret storage in database
+✅ **Vault Client** - Smart caching + fallback + audit logging
+✅ **Edge Function Integration** - Automatic secret loading
+✅ **Rotation Strategy** - 90-day schedule with audit trail
+✅ **AI Agent Workflows** - Optimized for Claude + ChatGPT
+
+## Prerequisites
+
+- Supabase project: `spdtwktxdalcfigzeqrz`
+- Service role key: Already in `~/.zshrc`
+- Secrets to migrate: GitHub token, plugin bearer token, etc.
+
+## Step-by-Step Setup
+
+### 1. Understand the Architecture
+
+```
+Claude Desktop ──┐
+                 ├──► Supabase Vault ──► Encrypted DB
+ChatGPT Plugin ──┘     (with caching)
+```
+
+**Key Files**:
+- `supabase/migrations/20251019_vault_setup.sql` - Vault schema + helper functions
+- `supabase/functions/chatgpt-plugin/vault-client.ts` - Client with caching
+- `supabase/functions/chatgpt-plugin/index.ts` - Updated to use Vault
+- `scripts/migrate-secrets-to-vault.sh` - Migration automation
+
+### 2. Apply Database Migration
+
+```bash
+# Navigate to project
+cd /Users/tbwa/Documents/GitHub/odoboo-workspace-temp
+
+# Apply Vault migration (creates functions, tables, policies)
+supabase db push
+
+# Verify migration
+psql "$POSTGRES_URL" -c "SELECT * FROM public.list_secret_names();"
+# Should return empty table (no secrets yet)
+```
+
+**What This Does**:
+- Creates `vault.secrets` table (if not exists)
+- Adds helper functions: `get_secret()`, `store_secret()`, `rotate_secret()`
+- Creates `secret_access_log` audit table
+- Sets up RLS policies (service_role only)
+
+### 3. Migrate Existing Secrets
+
+```bash
+# Run migration script
+./scripts/migrate-secrets-to-vault.sh
+
+# The script will:
+# - Store secrets in Vault
+# - Update Supabase Edge Function secrets
+# - Generate rotation schedule
+# - Create AI agent config file
+```
+
+**Secrets Migrated**:
+- `github_token` - GitHub Personal Access Token
+- `plugin_bearer_token` - ChatGPT plugin auth
+- `ocr_space_api_key` - OCR service
+- `supabase_*` - Supabase keys and URLs
+- `do_access_token` - DigitalOcean (if exists)
+- `openai_api_key` - OpenAI (if exists)
+- `anthropic_api_key` - Anthropic (if exists)
+
+### 4. Deploy Edge Function
+
+```bash
+# Deploy ChatGPT plugin with Vault support
+supabase functions deploy chatgpt-plugin --project-ref spdtwktxdalcfigzeqrz
+
+# Wait for deployment (30-60 seconds)
+# Check logs
+supabase functions logs chatgpt-plugin --project-ref spdtwktxdalcfigzeqrz
+```
+
+**Expected Output**:
+```
+🔐 Loading secrets from Vault...
+✅ Secrets loaded from Vault
+```
+
+### 5. Verify Setup
+
+```bash
+# Test health endpoint
+curl https://spdtwktxdalcfigzeqrz.supabase.co/functions/v1/chatgpt-plugin/health | jq
+
+# Expected response:
+{
+  "status": "ok",
+  "timestamp": "2025-10-19T...",
+  "github_token": "configured",
+  "auth_configured": true,
+  "secret_source": "vault"  # ← Confirms Vault is active
+}
+```
+
+### 6. Test Secret Access
+
+**Via SQL**:
+```bash
+# Test getting a secret
+psql "$POSTGRES_URL" -c "SELECT public.get_secret('github_token');"
+
+# Should return: ghp_... (your GitHub token)
+```
+
+**Via Edge Function**:
+```bash
+# Test GitHub file read (requires bearer token)
+curl -H "Authorization: Bearer YOUR_PLUGIN_BEARER_TOKEN" \
+  https://spdtwktxdalcfigzeqrz.supabase.co/functions/v1/chatgpt-plugin/repos/jgtolentino/odoboo-workspace/contents/README.md
+```
+
+### 7. Review Audit Logs
+
+```bash
+# Check secret access logs
+psql "$POSTGRES_URL" <<EOF
+SELECT
+  secret_name,
+  accessed_by,
+  success,
+  created_at
+FROM public.secret_access_log
+ORDER BY created_at DESC
+LIMIT 10;
+EOF
+```
+
+## Configuration Files
+
+### `.ai-agent-config.yaml`
+
+**Location**: `/Users/tbwa/Documents/GitHub/odoboo-workspace-temp/.ai-agent-config.yaml`
+
+**Purpose**: Defines how AI agents access secrets
+
+**Contents**:
+```yaml
+secret_management:
+  provider: "supabase-vault"
+  project_ref: "spdtwktxdalcfigzeqrz"
+
+  access:
+    claude_desktop:
+      method: "mcp"
+      secrets: ["github_token", "supabase_service_role_key"]
+
+    chatgpt_plugin:
+      method: "edge_function"
+      secrets: ["github_token", "plugin_bearer_token"]
+
+  security:
+    audit_logging: true
+    rotation_enabled: true
+    access_control: "role_based"
+```
+
+### Rotation Schedule
+
+**Location**: `/tmp/secret-rotation-schedule.md`
+
+**Generated By**: Migration script
+
+**Contents**: Secret rotation frequencies and next rotation dates
+
+## Common Tasks
+
+### Add a New Secret
+
+```sql
+SELECT public.store_secret(
+  'new_api_key',
+  'sk_live_...',
+  'Stripe API key for payments'
+);
+
+-- Also add to Edge Function secrets
+```
+
+```bash
+supabase secrets set NEW_API_KEY=sk_live_... --project-ref spdtwktxdalcfigzeqrz
+```
+
+### Rotate a Secret
+
+```sql
+-- 1. Generate new secret externally
+-- 2. Rotate in Vault
+SELECT public.rotate_secret('github_token', 'ghp_new_value');
+
+-- 3. Update Edge Function secrets
+```
+
+```bash
+supabase secrets set GITHUB_TOKEN=ghp_new_value --project-ref spdtwktxdalcfigzeqrz
+supabase functions deploy chatgpt-plugin --project-ref spdtwktxdalcfigzeqrz
+```
+
+### List All Secrets
+
+```sql
+SELECT * FROM public.list_secret_names();
+```
+
+```bash
+# Edge Function secrets
+supabase secrets list --project-ref spdtwktxdalcfigzeqrz
+```
+
+### Clear Secret Cache
+
+```typescript
+// In Edge Function code
+import { clearSecretCache } from './vault-client.ts'
+
+clearSecretCache('github_token')  // Clear specific secret
+clearSecretCache()                 // Clear all secrets
+```
+
+## Troubleshooting
+
+### Secret Not Found
+
+**Symptom**: `Secret not found: github_token`
+
+**Fix**:
+```sql
+-- Check if secret exists
+SELECT name FROM vault.secrets WHERE name = 'github_token';
+
+-- If missing, add it
+SELECT public.store_secret('github_token', 'ghp_...', 'GitHub PAT');
+```
+
+### Vault Unavailable (Fallback to Env Vars)
+
+**Symptom**: `⚠️ Vault unavailable, using environment variables`
+
+**Cause**: Database connection issue or Vault not initialized
+
+**Fix**:
+1. Check database connection: `psql "$POSTGRES_URL" -c "SELECT 1;"`
+2. Verify migration applied: `psql "$POSTGRES_URL" -c "SELECT * FROM vault.secrets LIMIT 1;"`
+3. If Vault missing: `supabase db push`
+
+### Permission Denied
+
+**Symptom**: `Access denied: Only service_role can access secrets`
+
+**Cause**: Trying to access Vault without service_role JWT
+
+**Fix**: Ensure Edge Function uses `SUPABASE_SERVICE_ROLE_KEY`:
+```typescript
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL'),
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')  // ← Must be service_role
+)
+```
+
+### Stale Secrets After Rotation
+
+**Symptom**: Edge Function still uses old secret after rotation
+
+**Cause**: Cache hasn't expired yet (5min TTL)
+
+**Fix**:
+```bash
+# Option 1: Wait 5 minutes for cache to expire
+sleep 300
+
+# Option 2: Redeploy Edge Function (clears cache)
+supabase functions deploy chatgpt-plugin --project-ref spdtwktxdalcfigzeqrz
+
+# Option 3: Call clearSecretCache() in code
+```
+
+## Security Checklist
+
+- [ ] Applied Vault migration
+- [ ] Migrated all secrets to Vault
+- [ ] Tested secret access from Edge Function
+- [ ] Verified audit logging works
+- [ ] Reviewed rotation schedule
+- [ ] Configured RLS policies
+- [ ] Removed secrets from `~/.zshrc` (optional, for production)
+- [ ] Set up rotation reminders (calendar/cron)
+- [ ] Documented secret owners and rotation contacts
+- [ ] Tested secret rotation process
+- [ ] Set up monitoring for failed access attempts
+
+## Next Steps
+
+1. **Set Up Rotation Reminders**
+   ```bash
+   # Add to crontab
+   0 9 * * 1 cat /tmp/secret-rotation-schedule.md | mail -s "Secret Rotation Check" you@example.com
+   ```
+
+2. **Monitor Audit Logs**
+   ```sql
+   -- Create view for failed access attempts
+   CREATE VIEW failed_secret_access AS
+   SELECT * FROM public.secret_access_log
+   WHERE success = FALSE
+   ORDER BY created_at DESC;
+   ```
+
+3. **Integrate WebSocket Edge Function** (chat_ws)
+   ```typescript
+   // Add to vault-client.ts usage
+   const wsToken = await getSecret('ws_bearer_token')
+   ```
+
+4. **Configure Additional Secrets**
+   - Anthropic API key for Claude
+   - OpenAI API key for GPT-4
+   - DeepSeek credentials
+   - Vercel tokens
+   - Any other API keys
+
+## Documentation
+
+**Full Documentation**: [AI_AGENT_SECRET_MANAGEMENT.md](./AI_AGENT_SECRET_MANAGEMENT.md)
+
+**Key Sections**:
+- Architecture Overview
+- Secret Storage Locations
+- AI Agent Access Patterns
+- Secret Lifecycle (Create, Access, Rotate, Audit)
+- Security Best Practices
+- Workflows
+- Migration Guide
+- Troubleshooting
+
+## Support
+
+**Issues**: Check audit logs first
+```sql
+SELECT * FROM public.secret_access_log
+WHERE success = FALSE
+ORDER BY created_at DESC
+LIMIT 20;
+```
+
+**Logs**: Edge Function logs
+```bash
+supabase functions logs chatgpt-plugin --project-ref spdtwktxdalcfigzeqrz
+```
+
+**Direct Database Access**:
+```bash
+psql "$POSTGRES_URL"
+```
