@@ -8,8 +8,8 @@ services:
       branch: feature/chatgpt-plugin
       deploy_on_push: true
 
-    source_dir: /chatgpt-plugin-server
-    dockerfile_path: Dockerfile
+    source_dir: chatgpt-plugin-server
+    dockerfile_path: chatgpt-plugin-server/Dockerfile
 
     http_port: 3000
 
