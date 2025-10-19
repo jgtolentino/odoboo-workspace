@@ -1,0 +1,401 @@
+openapi: 3.0.1
+info:
+  title: GitHub & Infrastructure Manager
+  description: API for managing GitHub repositories and infrastructure
+  version: "1.0.0"
+servers:
+  - url: YOUR_HOST
+
+paths:
+  /repos/{owner}/{repo}/contents/{path}:
+    get:
+      operationId: getFileContents
+      summary: Read file contents from GitHub repository
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          description: Repository owner (username or organization)
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          description: Repository name
+          schema:
+            type: string
+        - name: path
+          in: path
+          required: true
+          description: Path to file or directory
+          schema:
+            type: string
+      responses:
+        '200':
+          description: File or directory contents
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/FileContent'
+                  - $ref: '#/components/schemas/DirectoryListing'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      operationId: updateFile
+      summary: Create or update a file in GitHub repository
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+                - content
+              properties:
+                message:
+                  type: string
+                  description: Commit message
+                  example: "Update README.md"
+                content:
+                  type: string
+                  description: File content (plain text, will be base64 encoded)
+                  example: "# My Project\n\nThis is the README."
+                branch:
+                  type: string
+                  description: Branch to commit to (defaults to main)
+                  example: "feature/update-docs"
+                sha:
+                  type: string
+                  description: SHA of the file being replaced (required for updates)
+                  example: "abc123def456"
+      responses:
+        '200':
+          description: File created or updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileUpdateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /repos/{owner}/{repo}/branches:
+    post:
+      operationId: createBranch
+      summary: Create a new branch in the repository
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - branch
+              properties:
+                branch:
+                  type: string
+                  description: Name of the new branch
+                  example: "feature/new-feature"
+                from_branch:
+                  type: string
+                  description: Source branch to create from (defaults to main)
+                  example: "main"
+      responses:
+        '201':
+          description: Branch created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BranchCreateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /repos/{owner}/{repo}/pulls:
+    post:
+      operationId: createPullRequest
+      summary: Create a pull request
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - head
+                - base
+              properties:
+                title:
+                  type: string
+                  description: Title of the pull request
+                  example: "Add new feature"
+                head:
+                  type: string
+                  description: Name of the branch with changes
+                  example: "feature/new-feature"
+                base:
+                  type: string
+                  description: Name of the branch to merge into
+                  example: "main"
+                body:
+                  type: string
+                  description: Description of the pull request
+                  example: "This PR adds a new feature that..."
+      responses:
+        '201':
+          description: Pull request created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PullRequestResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /repos/{owner}/{repo}/issues:
+    post:
+      operationId: createIssue
+      summary: Create a new issue
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+                  description: Title of the issue
+                  example: "Bug: Login form not working"
+                body:
+                  type: string
+                  description: Description of the issue
+                  example: "When clicking login, the form doesn't submit..."
+                labels:
+                  type: array
+                  description: Labels to add to the issue
+                  items:
+                    type: string
+                  example: ["bug", "high-priority"]
+      responses:
+        '201':
+          description: Issue created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssueResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /health:
+    get:
+      operationId: healthCheck
+      summary: Check server health
+      responses:
+        '200':
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  timestamp:
+                    type: string
+                    format: date-time
+
+components:
+  schemas:
+    FileContent:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [file]
+        path:
+          type: string
+        sha:
+          type: string
+        size:
+          type: integer
+        content:
+          type: string
+          description: File content (decoded from base64)
+
+    DirectoryListing:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [directory]
+        contents:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              path:
+                type: string
+              type:
+                type: string
+                enum: [file, dir]
+              sha:
+                type: string
+
+    FileUpdateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        commit:
+          type: object
+          properties:
+            sha:
+              type: string
+            message:
+              type: string
+        content:
+          type: object
+          properties:
+            path:
+              type: string
+            sha:
+              type: string
+
+    BranchCreateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        branch:
+          type: string
+        sha:
+          type: string
+
+    PullRequestResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        number:
+          type: integer
+        url:
+          type: string
+        state:
+          type: string
+
+    IssueResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        number:
+          type: integer
+        url:
+          type: string
+        state:
+          type: string
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        details:
+          type: string
+
+  responses:
+    UnauthorizedError:
+      description: Authentication failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    BadRequestError:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []
