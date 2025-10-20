@@ -18,7 +18,7 @@ capabilities:
 
 integration:
   endpoint: 'https://wr2azp5dsl6mu6xvxtpglk5v.agents.do-ai.run'
-  fallback_local: 'http://localhost:8003/review'
+  mode: 'direct'
   auth_method: 'bearer_token'
 
 tools:
