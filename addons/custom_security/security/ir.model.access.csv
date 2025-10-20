@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_product_template_am,product.template.am,product.model_product_template,group_account_manager_limited,1,0,0,0
+access_product_product_am,product.product.am,product.model_product_product,group_account_manager_limited,1,0,0,0
+access_sale_order_am,sale.order.am,sale.model_sale_order,group_account_manager_limited,1,1,1,0
+access_sale_order_line_am,sale.order.line.am,sale.model_sale_order_line,group_account_manager_limited,1,1,1,1

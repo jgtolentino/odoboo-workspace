@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Account Manager Limited Group -->
+    <record id="group_account_manager_limited" model="res.groups">
+        <field name="name">Account Manager (Limited)</field>
+        <field name="category_id" ref="base.module_category_sales_sales"/>
+        <field name="comment">Can see products and rates, cannot see vendor names</field>
+    </record>
+
+    <!-- Record Rule: Hide Vendor/Supplier Partners -->
+    <record id="rule_hide_vendors_from_am" model="ir.rule">
+        <field name="name">AM: Hide Vendor Names</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="domain_force">[('supplier_rank', '=', 0)]</field>
+        <field name="groups" eval="[(4, ref('group_account_manager_limited'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <!-- Record Rule: Products are visible (no restriction) -->
+    <record id="rule_allow_products_for_am" model="ir.rule">
+        <field name="name">AM: Can See All Products</field>
+        <field name="model_id" ref="product.model_product_template"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_account_manager_limited'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+</odoo>

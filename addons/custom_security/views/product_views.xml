@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Hide supplier/vendor fields from Account Managers on product form -->
+    <record id="view_product_template_form_hide_vendor" model="ir.ui.view">
+        <field name="name">product.template.form.hide.vendor</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="groups_id" eval="[(4, ref('group_account_manager_limited'))]"/>
+        <field name="arch" type="xml">
+            <!-- Hide Purchase tab (contains vendor/supplier info) -->
+            <xpath expr="//page[@name='purchase']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <!-- Hide supplier_taxes_id field if visible elsewhere -->
+            <xpath expr="//field[@name='supplier_taxes_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Product list view - keep simple, just name and price -->
+    <record id="view_product_template_tree_am" model="ir.ui.view">
+        <field name="name">product.template.tree.am</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="groups_id" eval="[(4, ref('group_account_manager_limited'))]"/>
+        <field name="arch" type="xml">
+            <!-- Show name, list_price, and basic fields only -->
+            <xpath expr="//tree" position="attributes">
+                <attribute name="create">0</attribute>
+                <attribute name="edit">0</attribute>
+                <attribute name="delete">0</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>
