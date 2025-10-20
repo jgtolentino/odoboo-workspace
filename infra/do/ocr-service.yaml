@@ -5,7 +5,7 @@ services:
     dockerfile_path: services/ocr-service/Dockerfile
     source_dir: services/ocr-service
     github:
-      repo: your-org/odoboo-workspace
+      repo: jgtolentino/odoboo-workspace
       branch: main
       deploy_on_push: true
     instance_count: 1
