@@ -1,0 +1,93 @@
+name: Spec Inventory Validation
+
+on:
+  pull_request:
+    paths:
+      - 'FEATURES.md'
+      - 'specs/**/*.yml'
+      - 'specs/**/*.yaml'
+      - 'scripts/spec-inventory-validate.js'
+  push:
+    branches: [main, staging]
+    paths:
+      - 'FEATURES.md'
+      - 'specs/**/*.yml'
+      - 'specs/**/*.yaml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    name: Validate Spec Inventory
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm install --save-dev globby gray-matter js-yaml remark remark-parse unified
+
+      - name: Run spec inventory validation
+        run: node scripts/spec-inventory-validate.js
+
+      - name: Upload spec index artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spec-index
+          path: .out/spec-index.json
+          retention-days: 30
+
+      - name: Comment on PR with spec summary
+        if: github.event_name == 'pull_request' && success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const index = JSON.parse(fs.readFileSync('.out/spec-index.json', 'utf8'));
+
+            const summary = `
+            ## 📋 Spec Inventory Summary
+
+            **Total Specs**: ${index.length}
+
+            ### By Status
+            - ✅ Done: ${index.filter(s => s.status === 'done').length}
+            - 🚧 Doing: ${index.filter(s => s.status === 'doing').length}
+            - 📝 Todo: ${index.filter(s => s.status === 'todo').length}
+            - ⏸️  Paused: ${index.filter(s => s.status === 'paused').length}
+
+            ### By Priority
+            - 🔴 P0: ${index.filter(s => s.priority === 'P0').length}
+            - 🟡 P1: ${index.filter(s => s.priority === 'P1').length}
+            - 🟢 P2: ${index.filter(s => s.priority === 'P2').length}
+
+            <details>
+            <summary>View all specs</summary>
+
+            | ID | Title | Priority | Owner | Status |
+            |---|---|---|---|---|
+            ${index.map(s => `| ${s.id} | ${s.title} | ${s.priority} | ${s.owner} | ${s.status} |`).join('\n')}
+
+            </details>
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
+
+      - name: Fail on validation errors
+        if: failure()
+        run: |
+          echo "❌ Spec inventory validation failed!"
+          echo "Check the logs above for details."
+          exit 1

@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "spec-inventory": {
+      "command": "node",
+      "args": ["servers/mcp-spec-inventory/dist/index.js"],
+      "env": {
+        "WORKSPACE_ROOT": "${workspaceFolder}",
+        "SPECS_DIR": "specs"
+      }
+    },
+    "odoo": {
+      "command": "python3",
+      "args": ["servers/mcp-odoo/main.py"],
+      "env": {
+        "ODOO_URL": "https://insightpulseai.net",
+        "ODOO_DB": "odoboo_prod",
+        "ODOO_USER": "admin@insightpulseai.net",
+        "ODOO_PWD": "${ODOO_PASSWORD}"
+      }
+    },
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp?project_ref=spdtwktxdalcfigzeqrz&features=docs%2Cdatabase%2Caccount%2Cdebugging%2Cdevelopment%2Cfunctions%2Cbranching%2Cstorage"
+    }
+  }
+}
