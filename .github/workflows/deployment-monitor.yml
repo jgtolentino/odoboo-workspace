@@ -6,22 +6,40 @@ on:
     - cron: '*/30 * * * *'
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main]  # Only run on main branch
 
 jobs:
   monitor:
-    if: ${{ secrets.MONITOR_ENABLED == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: OCR must be up
-        run: curl -fsS https://ocr.insightpulseai.net/health | jq .
+      - name: Check if monitoring is enabled
+        id: check_enabled
+        run: |
+          # Check if MONITOR_ENABLED secret is set to 'true'
+          if [[ "${{ secrets.MONITOR_ENABLED }}" == "true" ]]; then
+            echo "enabled=true" >> $GITHUB_OUTPUT
+            echo "✅ Monitoring is enabled"
+          else
+            echo "enabled=false" >> $GITHUB_OUTPUT
+            echo "⏭️ Monitoring is disabled (set MONITOR_ENABLED=true to enable)"
+          fi
+
+      - name: Check OCR health
+        if: steps.check_enabled.outputs.enabled == 'true'
+        continue-on-error: true
+        run: |
+          if curl -fsS https://ocr.insightpulseai.net/health | jq .; then
+            echo "✅ OCR service is healthy"
+          else
+            echo "⚠️ OCR service health check failed"
+          fi
 
       - name: Check Vercel Deployment
-        if: vars.VERCEL_PROJECT_ID != ''
+        if: steps.check_enabled.outputs.enabled == 'true' && vars.VERCEL_PROJECT_ID != ''
         run: |
           RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
             "https://api.vercel.com/v6/deployments?projectId=${{ vars.VERCEL_PROJECT_ID }}&limit=1")
@@ -38,6 +56,7 @@ jobs:
           fi
 
       - name: Check GitHub Actions Status
+        if: steps.check_enabled.outputs.enabled == 'true'
         run: |
           RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/repos/${{ github.repository }}/actions/runs?per_page=1&branch=main")
@@ -55,7 +74,7 @@ jobs:
           fi
 
       - name: Check Supabase Health
-        if: vars.SUPABASE_PROJECT_REF != ''
+        if: steps.check_enabled.outputs.enabled == 'true' && vars.SUPABASE_PROJECT_REF != ''
         run: |
           # Ping Supabase project URL
           HEALTH_URL="https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co/rest/v1/"
@@ -72,7 +91,7 @@ jobs:
           fi
 
       - name: Check DigitalOcean App
-        if: vars.DO_APP_ID != ''
+        if: steps.check_enabled.outputs.enabled == 'true' && vars.DO_APP_ID != ''
         run: |
           RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.DO_ACCESS_TOKEN }}" \
             "https://api.digitalocean.com/v2/apps/${{ vars.DO_APP_ID }}")
@@ -88,9 +107,15 @@ jobs:
             echo "⚠️ DigitalOcean app not active: $PHASE"
           fi
 
-      - name: Odoo optional (don't fail)
+      - name: Odoo health check (optional)
+        if: steps.check_enabled.outputs.enabled == 'true'
         continue-on-error: true
-        run: '[ -z "${{ secrets.ODOO_FQDN }}" ] || curl -fsS https://${{ secrets.ODOO_FQDN }}/web/login'
+        run: |
+          if [[ -n "${{ secrets.ODOO_FQDN }}" ]]; then
+            curl -fsS https://${{ secrets.ODOO_FQDN }}/web/login && echo "✅ Odoo is accessible"
+          else
+            echo "⏭️ ODOO_FQDN not set, skipping Odoo health check"
+          fi
 
       - name: Send notification on failure
         if: failure()
