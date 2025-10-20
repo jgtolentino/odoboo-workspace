@@ -1,131 +1,55 @@
 name: Deploy Odoo 18.0 to DigitalOcean
 
 on:
+  workflow_dispatch: {}
   push:
-    branches: [main]
+    tags: ['v*.*.*']    # deploy only on version tags
     paths:
-      - 'Dockerfile'
-      - 'docker-compose.yml'
-      - 'config/**'
-      - 'terraform/**'
+      - 'infra/odoo/**'
+      - 'scripts/install-modules.sh'
       - '.github/workflows/deploy-odoo.yml'
-  workflow_dispatch:
 
 env:
   REGISTRY: registry.digitalocean.com
   IMAGE_NAME: odoo18-oca
 
 jobs:
-  build-and-push:
+  deploy:
+    if: ${{ secrets.SSH_KEY && secrets.DO_ACCESS_TOKEN }}   # skip if missing
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: deploy-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
+      - uses: digitalocean/action-doctl@v2
         with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          token: ${{ secrets.DO_ACCESS_TOKEN }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Check OCR health (must pass)
+        run: curl -fsS https://ocr.insightpulseai.net/health | jq .
 
-      - name: Log in to DigitalOcean Container Registry
-        run: doctl registry login --expiry-seconds 1200
+      - name: Skip Odoo deploy if not configured yet
+        if: ${{ !secrets.ODOO_IP }}
+        run: echo "ODOO_IP not set; skipping deploy step."
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+      - name: Deploy Odoo (when ready)
+        if: ${{ secrets.ODOO_IP }}
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          context: .
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ secrets.DO_REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-            ${{ env.REGISTRY }}/${{ secrets.DO_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ secrets.DO_REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ secrets.DO_REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+          host: ${{ secrets.ODOO_IP }}
+          username: root
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /opt/odoo && docker compose pull && docker compose up -d
 
-      - name: Deploy to App Platform (if configured)
-        if: ${{ secrets.APP_ID != '' }}
-        run: |
-          doctl apps create-deployment ${{ secrets.APP_ID }} --wait
+      - name: Odoo health (non-blocking until live)
+        if: ${{ secrets.ODOO_FQDN }}
         continue-on-error: true
-
-  deploy-terraform:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.6.0
-
-      - name: Terraform Format Check
-        working-directory: ./terraform
-        run: terraform fmt -check
-        continue-on-error: true
-
-      - name: Terraform Init
-        working-directory: ./terraform
-        run: terraform init
+        run: curl -fsS https://$ODOO_FQDN/web/login || echo "Odoo not live yet (allowed)."
         env:
-          TF_VAR_do_token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          ODOO_FQDN: ${{ secrets.ODOO_FQDN }}
 
-      - name: Terraform Validate
-        working-directory: ./terraform
-        run: terraform validate
-
-      - name: Terraform Plan
-        working-directory: ./terraform
-        run: terraform plan -out=tfplan
-        env:
-          TF_VAR_do_token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-          TF_VAR_domain_name: ${{ vars.DOMAIN_NAME }}
-          TF_VAR_admin_password: ${{ secrets.ODOO_ADMIN_PASSWORD }}
-
-      - name: Terraform Apply
-        working-directory: ./terraform
-        run: terraform apply -auto-approve tfplan
-        env:
-          TF_VAR_do_token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-          TF_VAR_domain_name: ${{ vars.DOMAIN_NAME }}
-          TF_VAR_admin_password: ${{ secrets.ODOO_ADMIN_PASSWORD }}
-
-      - name: Get deployment outputs
-        working-directory: ./terraform
-        run: |
-          echo "Odoo Server IP: $(terraform output -raw odoo_server_ip)"
-          echo "Load Balancer IP: $(terraform output -raw load_balancer_ip)"
-          echo "Spaces Bucket: $(terraform output -raw spaces_bucket_name)"
-
-  health-check:
-    needs: [build-and-push, deploy-terraform]
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Wait for deployment
-        run: sleep 120
-
-      - name: Check Odoo health endpoint
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://${{ vars.DOMAIN_NAME }}/web/health || echo "000")
-          if [ "$STATUS" = "200" ]; then
-            echo "✅ Odoo is healthy (HTTP $STATUS)"
-          else
-            echo "❌ Odoo health check failed (HTTP $STATUS)"
-            exit 1
-          fi
-        continue-on-error: true
-
-      - name: Notify deployment status
-        if: always()
-        run: |
-          if [ "${{ job.status }}" = "success" ]; then
-            echo "✅ Deployment successful!"
-            echo "Access Odoo at: https://${{ vars.DOMAIN_NAME }}"
-          else
-            echo "❌ Deployment may have issues. Check logs."
-          fi

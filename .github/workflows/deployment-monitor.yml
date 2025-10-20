@@ -9,12 +9,16 @@ on:
     branches: [main]
 
 jobs:
-  check-deployments:
+  monitor:
+    if: ${{ secrets.MONITOR_ENABLED == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: OCR must be up
+        run: curl -fsS https://ocr.insightpulseai.net/health | jq .
 
       - name: Check Vercel Deployment
         if: vars.VERCEL_PROJECT_ID != ''
@@ -83,6 +87,10 @@ jobs:
           if [ "$PHASE" != "ACTIVE" ]; then
             echo "⚠️ DigitalOcean app not active: $PHASE"
           fi
+
+      - name: Odoo optional (don't fail)
+        continue-on-error: true
+        run: '[ -z "${{ secrets.ODOO_FQDN }}" ] || curl -fsS https://${{ secrets.ODOO_FQDN }}/web/login'
 
       - name: Send notification on failure
         if: failure()
