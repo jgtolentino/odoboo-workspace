@@ -1,9 +1,17 @@
 # Environment & Secrets
 .env
 .env.local
+.env.production
+.env.staging
 .env.*.local
 *.env
 !.env.example
+!.env.sample
+
+# Odoo Config Files (may contain secrets)
+config/odoo.conf
+config/*.conf
+!config/odoo.example.conf
 
 # Odoo Runtime Data
 /odoo-data/
@@ -54,6 +62,8 @@ docker-compose.override.yml
 /backups/
 *.dump
 *.sql
+!scripts/*.sql
+!scripts/**/*.sql
 *.tar.gz
 *.zip
 *.bak
@@ -63,6 +73,7 @@ docker-compose.override.yml
 *.temp
 /tmp/
 .cache/
+.out/
 
 # Node.js (if using any JS tools)
 node_modules/

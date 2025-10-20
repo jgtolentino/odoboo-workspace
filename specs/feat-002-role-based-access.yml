@@ -1,0 +1,38 @@
+id: FEAT-002
+title: Role-Based Access Control (RBAC)
+priority: P0
+owner: security@insightpulseai.net
+status: doing
+created: 2025-10-16
+updated: 2025-10-20
+
+description: |
+  Implement fine-grained role-based access control system with custom roles,
+  permissions, and resource-level authorization.
+
+tags:
+  - security
+  - rbac
+  - permissions
+
+epic: Security & Access Control
+
+acceptance_criteria:
+  - Define role hierarchy (Admin, Manager, User, Guest)
+  - Resource-level permissions
+  - Row-level security policies
+  - Audit logging for access events
+  - Permission inheritance
+  - Custom role creation
+
+related:
+  - FEAT-001
+  - FEAT-015
+
+blockers:
+  - Waiting for Supabase RLS policy review
+  - Performance testing with 10K+ permission rules
+
+notes: |
+  In progress. Core role system implemented. Working on RLS policies.
+  Target completion: 2025-10-25
