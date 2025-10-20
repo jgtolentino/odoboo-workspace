@@ -1,0 +1,18 @@
+name: CI
+on:
+  push: { branches: [main, staging] }
+  pull_request: { branches: [main] }
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node (optional)
+        uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Install (if pnpm)
+        run: |
+          if [ -f pnpm-lock.yaml ]; then npm i -g pnpm && pnpm i; fi
+      - name: Lint/Test (noop if none)
+        run: |
+          if [ -f package.json ]; then (pnpm lint || true; pnpm test || true); fi

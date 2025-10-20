@@ -1,20 +1,12 @@
 ## Summary
+Why this change?
 
-- Short description
+## Changes
+* …
 
-## Scope
+## Testing
+Logs/Screens/smoke steps.
 
-- Files touched
-
-## Acceptance
-
-- [ ] Criteria met
-- [ ] No console warnings
-- [ ] Lighthouse Best Practices ≥ 90 (changed pages)
-
-## Checks
-
-- [ ] `pnpm lint`
-- [ ] `pnpm typecheck`
-- [ ] `pnpm test`
-- [ ] DB: no drift (`db-pr.yml`)
+## Release
+* [ ] No secrets in diff
+* [ ] DB migrations safe

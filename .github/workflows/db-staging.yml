@@ -1,0 +1,20 @@
+name: DB - Staging
+on:
+  push:
+    branches: [staging]
+jobs:
+  migrate-staging:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run migrations
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        run: |
+          if [ -f scripts/run-migrations.ts ]; then
+            node scripts/run-migrations.ts
+          elif command -v supabase >/dev/null 2>&1; then
+            supabase migration up
+          else
+            echo "Add your migration runner"; exit 1
+          fi
