@@ -1,0 +1,161 @@
+name: Visual Regression Testing
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**/*.tsx'
+      - 'src/**/*.css'
+      - 'app/**/*.tsx'
+      - 'components/**/*.tsx'
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Base URL to test'
+        required: false
+        default: 'http://localhost:3000'
+
+jobs:
+  visual-regression:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Build application
+        run: npm run build
+
+      - name: Start preview server
+        run: |
+          npm run preview &
+          echo $! > preview.pid
+          sleep 5
+
+      - name: Capture screenshots
+        run: |
+          node vscode-extension/src/commands/visualSnapshot.js \
+            --routes="/,/expenses,/tasks,/dashboard" \
+            --base-url="${{ github.event.inputs.base_url || 'http://localhost:4173' }}" \
+            --output=".screenshots/current"
+
+      - name: Download baseline screenshots
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: visual-regression.yml
+          name: visual-baselines
+          path: .screenshots/baseline
+          if_no_artifact_found: warn
+
+      - name: Compare screenshots with SSIM
+        id: visual-compare
+        run: |
+          if [ ! -d ".screenshots/baseline" ]; then
+            echo "No baseline found - creating new baseline"
+            echo "status=baseline-created" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Compare screenshots
+          DIFF_COUNT=0
+          for file in .screenshots/current/*.png; do
+            filename=$(basename "$file")
+            baseline=".screenshots/baseline/$filename"
+
+            if [ -f "$baseline" ]; then
+              # Use image-ssim for comparison
+              SSIM=$(node -e "
+                const ssim = require('image-ssim');
+                const fs = require('fs');
+                const baseline = fs.readFileSync('$baseline');
+                const current = fs.readFileSync('$file');
+                const result = ssim.compare(baseline, current);
+                console.log(result.mssim);
+              ")
+
+              DIFF=$(echo "scale=4; (1 - $SSIM) * 100" | bc)
+
+              echo "📸 $filename: SSIM diff = ${DIFF}%"
+
+              # Fail if difference > 2%
+              if (( $(echo "$DIFF > 2.0" | bc -l) )); then
+                echo "❌ Visual regression detected: $filename (${DIFF}% difference)"
+                DIFF_COUNT=$((DIFF_COUNT + 1))
+              fi
+            else
+              echo "⚠️ No baseline for $filename"
+            fi
+          done
+
+          if [ $DIFF_COUNT -gt 0 ]; then
+            echo "status=regression-detected" >> $GITHUB_OUTPUT
+            echo "diff_count=$DIFF_COUNT" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "status=passed" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload current screenshots as artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-screenshots-${{ github.sha }}
+          path: .screenshots/current/
+          retention-days: 30
+
+      - name: Update baseline on main branch
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-baselines
+          path: .screenshots/current/
+          retention-days: 90
+
+      - name: Comment on PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ steps.visual-compare.outputs.status }}';
+            const diffCount = '${{ steps.visual-compare.outputs.diff_count }}';
+
+            let body = '## 📸 Visual Regression Test Results\n\n';
+
+            if (status === 'baseline-created') {
+              body += '✅ **New baseline created** - no previous screenshots to compare\n\n';
+              body += 'Merge this PR to establish the visual baseline.';
+            } else if (status === 'passed') {
+              body += '✅ **All visual tests passed** - no regressions detected\n\n';
+              body += 'All screenshots match the baseline (SSIM difference < 2%)';
+            } else if (status === 'regression-detected') {
+              body += `❌ **Visual regressions detected** - ${diffCount} screenshot(s) differ from baseline\n\n`;
+              body += 'Review the uploaded screenshots in the workflow artifacts to verify changes are intentional.';
+            }
+
+            body += `\n\n**Workflow Run**: [View Details](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });
+
+      - name: Cleanup
+        if: always()
+        run: |
+          if [ -f preview.pid ]; then
+            kill $(cat preview.pid) || true
+          fi

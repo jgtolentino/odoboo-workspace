@@ -1,0 +1,20 @@
+# docker-compose.simple.yml - Simplified Odoo with direct Supabase connection
+version: '3.8'
+
+services:
+  odoo:
+    image: odoo:18.0
+    container_name: odoo18
+    ports:
+      - "8069:8069"
+      - "8072:8072"
+    environment:
+      - HOST=aws-1-us-east-1.pooler.supabase.com
+      - PORT=6543
+      - USER=postgres.spdtwktxdalcfigzeqrz
+      - PASSWORD=SHWYXDMFAwXI1drT
+    volumes:
+      - odoo-data:/var/lib/odoo
+
+volumes:
+  odoo-data:

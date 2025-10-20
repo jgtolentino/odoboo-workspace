@@ -1,0 +1,35 @@
+# docker-compose.supabase.yml - Odoo 18.0 connected to Supabase PostgreSQL
+services:
+  odoo:
+    image: odoo:18.0
+    container_name: odoo18-supabase
+    ports:
+      - "8069:8069"
+      - "8072:8072"
+    environment:
+      # Supabase PostgreSQL connection (using non-pooling for Odoo compatibility)
+      - HOST=aws-1-us-east-1.pooler.supabase.com
+      - PORT=5432
+      - USER=postgres.spdtwktxdalcfigzeqrz
+      - PASSWORD=SHWYXDMFAwXI1drT
+      - DB_NAME=postgres
+      # Odoo configuration
+      - DB_SSLMODE=require
+      - LIMIT_TIME_CPU=600
+      - LIMIT_TIME_REAL=1200
+      - WORKERS=4
+      - MAX_CRON_THREADS=2
+    volumes:
+      - odoo-data:/var/lib/odoo
+      - ./addons:/mnt/extra-addons
+      - ./oca/social:/mnt/oca/social:ro
+      - ./oca/server-ux:/mnt/oca/server-ux:ro
+      - ./oca/web:/mnt/oca/web:ro
+      - ./config/odoo.supabase.conf:/etc/odoo/odoo.conf:ro
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  odoo-data:
+    driver: local

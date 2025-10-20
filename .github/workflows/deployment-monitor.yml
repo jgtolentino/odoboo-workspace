@@ -1,0 +1,91 @@
+name: Deployment Status Monitor
+
+on:
+  schedule:
+    # Run every 30 minutes
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  check-deployments:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check Vercel Deployment
+        if: vars.VERCEL_PROJECT_ID != ''
+        run: |
+          RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
+            "https://api.vercel.com/v6/deployments?projectId=${{ vars.VERCEL_PROJECT_ID }}&limit=1")
+
+          STATE=$(echo "$RESPONSE" | jq -r '.deployments[0].state')
+          URL=$(echo "$RESPONSE" | jq -r '.deployments[0].url')
+
+          echo "### Vercel Deployment Status" >> $GITHUB_STEP_SUMMARY
+          echo "- **State**: $STATE" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL**: https://$URL" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$STATE" != "READY" ]; then
+            echo "⚠️ Vercel deployment not ready: $STATE"
+          fi
+
+      - name: Check GitHub Actions Status
+        run: |
+          RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs?per_page=1&branch=main")
+
+          STATUS=$(echo "$RESPONSE" | jq -r '.workflow_runs[0].status')
+          CONCLUSION=$(echo "$RESPONSE" | jq -r '.workflow_runs[0].conclusion')
+
+          echo "### GitHub Actions Status" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: $STATUS" >> $GITHUB_STEP_SUMMARY
+          echo "- **Conclusion**: $CONCLUSION" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$CONCLUSION" == "failure" ]; then
+            echo "❌ Latest workflow failed"
+            exit 1
+          fi
+
+      - name: Check Supabase Health
+        if: vars.SUPABASE_PROJECT_REF != ''
+        run: |
+          # Ping Supabase project URL
+          HEALTH_URL="https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co/rest/v1/"
+
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            "$HEALTH_URL")
+
+          echo "### Supabase Status" >> $GITHUB_STEP_SUMMARY
+          echo "- **HTTP Status**: $STATUS_CODE" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$STATUS_CODE" != "200" ]; then
+            echo "⚠️ Supabase health check failed: HTTP $STATUS_CODE"
+          fi
+
+      - name: Check DigitalOcean App
+        if: vars.DO_APP_ID != ''
+        run: |
+          RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.DO_ACCESS_TOKEN }}" \
+            "https://api.digitalocean.com/v2/apps/${{ vars.DO_APP_ID }}")
+
+          PHASE=$(echo "$RESPONSE" | jq -r '.app.active_deployment.phase')
+          LIVE_URL=$(echo "$RESPONSE" | jq -r '.app.live_url')
+
+          echo "### DigitalOcean App Status" >> $GITHUB_STEP_SUMMARY
+          echo "- **Phase**: $PHASE" >> $GITHUB_STEP_SUMMARY
+          echo "- **Live URL**: $LIVE_URL" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$PHASE" != "ACTIVE" ]; then
+            echo "⚠️ DigitalOcean app not active: $PHASE"
+          fi
+
+      - name: Send notification on failure
+        if: failure()
+        run: |
+          echo "🚨 Deployment health check failed!"
+          echo "Check the workflow summary for details"

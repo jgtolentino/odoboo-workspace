@@ -1,0 +1,82 @@
+# docker-compose.yml - Local development environment for Odoo 18.0
+version: '3.8'
+
+services:
+  odoo:
+    build: .
+    container_name: odoo18
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "8069:8069"
+      - "8072:8072"
+    volumes:
+      - odoo-data:/var/lib/odoo
+      - ./config:/etc/odoo
+      - ./addons:/mnt/extra-addons
+      - ./oca:/mnt/oca
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=odoo
+      - PORT=5432
+    networks:
+      - odoo-network
+    restart: unless-stopped
+
+  db:
+    image: postgres:15
+    container_name: postgres15
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=odoo
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - odoo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odoo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    networks:
+      - odoo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - odoo
+    networks:
+      - odoo-network
+    restart: unless-stopped
+
+volumes:
+  odoo-data:
+    driver: local
+  db-data:
+    driver: local
+
+networks:
+  odoo-network:
+    driver: bridge

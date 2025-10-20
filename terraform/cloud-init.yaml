@@ -1,0 +1,196 @@
+#cloud-config
+# cloud-init.yaml - Automated server setup for Odoo 18.0
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - docker.io
+  - docker-compose
+  - git
+  - nginx
+  - certbot
+  - python3-certbot-nginx
+  - postgresql-client
+  - redis-server
+  - ufw
+  - htop
+  - curl
+  - wget
+
+users:
+  - name: odoo
+    groups: docker
+    shell: /bin/bash
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+
+write_files:
+  - path: /home/odoo/docker-compose.yml
+    content: |
+      version: '3.8'
+      services:
+        odoo:
+          image: odoo:18.0
+          restart: always
+          ports:
+            - "8069:8069"
+            - "8072:8072"
+          environment:
+            - HOST=${db_host}
+            - USER=${db_user}
+            - PASSWORD=${db_password}
+            - PORT=${db_port}
+          volumes:
+            - odoo-data:/var/lib/odoo
+            - ./config:/etc/odoo
+            - ./addons:/mnt/extra-addons
+            - ./oca:/mnt/oca
+          depends_on:
+            - redis
+
+        redis:
+          image: redis:7-alpine
+          restart: always
+
+      volumes:
+        odoo-data:
+
+  - path: /home/odoo/config/odoo.conf
+    content: |
+      [options]
+      admin_passwd = ${admin_pass}
+      db_host = ${db_host}
+      db_port = ${db_port}
+      db_user = ${db_user}
+      db_password = ${db_password}
+      db_maxconn = 64
+      addons_path = /mnt/extra-addons,/mnt/oca,/usr/lib/python3/dist-packages/odoo/addons
+      data_dir = /var/lib/odoo
+      workers = 4
+      max_cron_threads = 2
+      limit_memory_hard = 2684354560
+      limit_memory_soft = 2147483648
+      limit_request = 8192
+      limit_time_cpu = 600
+      limit_time_real = 1200
+      xmlrpc_port = 8069
+      longpolling_port = 8072
+      proxy_mode = True
+      list_db = False
+      log_level = info
+
+  - path: /etc/nginx/sites-available/odoo
+    content: |
+      upstream odoo {
+          server 127.0.0.1:8069;
+      }
+      upstream odoochat {
+          server 127.0.0.1:8072;
+      }
+      server {
+          listen 80;
+          server_name _;
+
+          client_max_body_size 100M;
+
+          proxy_read_timeout 720s;
+          proxy_connect_timeout 720s;
+          proxy_send_timeout 720s;
+
+          proxy_set_header X-Forwarded-Host $host;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          proxy_set_header X-Real-IP $remote_addr;
+
+          location / {
+              proxy_redirect off;
+              proxy_pass http://odoo;
+          }
+
+          location /longpolling {
+              proxy_pass http://odoochat;
+          }
+
+          location ~* /web/static/ {
+              proxy_cache_valid 200 90m;
+              proxy_buffering on;
+              expires 864000;
+              proxy_pass http://odoo;
+          }
+
+          location /web/health {
+              proxy_pass http://odoo;
+              access_log off;
+          }
+      }
+
+runcmd:
+  # Enable and start Docker
+  - systemctl enable docker
+  - systemctl start docker
+
+  # Enable and start Redis
+  - systemctl enable redis-server
+  - systemctl start redis-server
+
+  # Setup firewall
+  - ufw allow 22/tcp
+  - ufw allow 80/tcp
+  - ufw allow 443/tcp
+  - ufw allow 8069/tcp
+  - ufw allow 8072/tcp
+  - ufw --force enable
+
+  # Setup Nginx
+  - ln -s /etc/nginx/sites-available/odoo /etc/nginx/sites-enabled/
+  - rm -f /etc/nginx/sites-enabled/default
+  - nginx -t
+  - systemctl restart nginx
+
+  # Clone repository
+  - cd /home/odoo
+  - git clone https://github.com/jgtolentino/odoboo-workspace.git || true
+  - cd odoboo-workspace || mkdir -p odoboo-workspace
+
+  # Create directories
+  - mkdir -p /home/odoo/oca /home/odoo/addons /home/odoo/config
+
+  # Download OCA modules
+  - cd /home/odoo/oca
+  - |
+    for repo in web server-ux server-tools reporting-engine account-financial-reporting \
+                mis-builder helpdesk contract sale-workflow project hr knowledge; do
+      git clone -b 18.0 --depth 1 https://github.com/OCA/$repo 2>/dev/null || \
+      git clone -b 17.0 --depth 1 https://github.com/OCA/$repo 2>/dev/null || \
+      echo "Skipping $repo (not available)"
+    done
+
+  # Set ownership
+  - chown -R odoo:odoo /home/odoo
+
+  # Start Odoo
+  - cd /home/odoo
+  - docker-compose up -d
+
+  # Wait for Odoo to start
+  - sleep 30
+
+  # Initialize database
+  - |
+    docker exec $(docker ps -qf "name=odoo") odoo \
+      -c /etc/odoo/odoo.conf \
+      -d odoo18 \
+      -i base \
+      --stop-after-init \
+      --without-demo=all || true
+
+final_message: |
+  Odoo 18.0 installation complete!
+
+  Access Odoo at: http://$(curl -s http://169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address):8069
+
+  Database name: odoo18
+  Admin password: Set during installation
+
+  To view logs: docker logs -f $(docker ps -qf "name=odoo")
+  To restart: docker-compose restart

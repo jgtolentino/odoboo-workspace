@@ -1,0 +1,44 @@
+.ocr_diff_widget {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+}
+
+.diff-row {
+    display: grid;
+    grid-template-columns: 150px 1fr 1fr;
+    gap: 10px;
+    padding: 8px;
+    margin-bottom: 8px;
+    background: white;
+    border-left: 3px solid #ffc107;
+}
+
+.diff-field {
+    font-weight: 600;
+    color: #495057;
+}
+
+.diff-old {
+    color: #dc3545;
+    padding: 4px 8px;
+    background: #f8d7da;
+    border-radius: 3px;
+}
+
+.diff-new {
+    color: #28a745;
+    padding: 4px 8px;
+    background: #d4edda;
+    border-radius: 3px;
+}
+
+.alert-warning {
+    margin-bottom: 15px;
+}
+
+.o_field_progressbar {
+    min-width: 150px;
+}

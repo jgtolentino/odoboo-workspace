@@ -1,0 +1,73 @@
+name: odoo_mobile_app
+description: Cross-platform mobile app for Odoo 18+ with project management and task tracking
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Odoo RPC Client
+  odoo_rpc: ^0.5.0
+
+  # State Management
+  provider: ^6.1.1
+
+  # HTTP & Networking
+  http: ^1.1.0
+  dio: ^5.4.0
+
+  # Local Storage
+  shared_preferences: ^2.2.2
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  # UI Components
+  cupertino_icons: ^1.0.6
+  flutter_slidable: ^3.0.1
+  pull_to_refresh: ^2.0.0
+  cached_network_image: ^3.3.1
+  flutter_spinkit: ^5.2.0
+
+  # File & Image Handling
+  image_picker: ^1.0.7
+  file_picker: ^6.1.1
+  path_provider: ^2.1.2
+
+  # Push Notifications (Optional)
+  firebase_core: ^2.24.2
+  firebase_messaging: ^14.7.10
+  flutter_local_notifications: ^16.3.2
+
+  # Utilities
+  intl: ^0.18.1
+  uuid: ^4.3.3
+  logger: ^2.0.2+1
+
+  # Markdown & Rich Text
+  flutter_markdown: ^0.6.18
+  flutter_quill: ^9.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.8
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
+
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: fonts/Roboto-Regular.ttf
+        - asset: fonts/Roboto-Bold.ttf
+          weight: 700

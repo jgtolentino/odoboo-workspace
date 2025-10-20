@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Root Menu -->
+    <menuitem id="menu_dashboard_root"
+              name="Dashboards"
+              sequence="5"
+              web_icon="web_dashboard_advanced,static/description/icon.png"/>
+
+    <!-- Dashboards Menu -->
+    <menuitem id="menu_dashboards"
+              name="My Dashboards"
+              parent="menu_dashboard_root"
+              action="action_dashboard"
+              sequence="10"/>
+
+    <!-- Widgets Menu -->
+    <menuitem id="menu_dashboard_widgets"
+              name="Dashboard Widgets"
+              parent="menu_dashboard_root"
+              action="action_dashboard_widget"
+              sequence="20"/>
+
+    <!-- Configuration Menu -->
+    <menuitem id="menu_dashboard_config"
+              name="Configuration"
+              parent="menu_dashboard_root"
+              sequence="100"
+              groups="base.group_system"/>
+
+</odoo>

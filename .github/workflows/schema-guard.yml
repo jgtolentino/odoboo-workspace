@@ -1,0 +1,161 @@
+name: Database Schema Guard
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+      - 'packages/db/**'
+
+jobs:
+  schema-guard:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Check for duplicate tables
+        env:
+          POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+        run: |
+          psql "$POSTGRES_URL" -t -c "
+          WITH t AS (
+            SELECT table_schema, table_name,
+                   regexp_replace(table_name, '(s$|_v[0-9]+$|_backup$|_tmp$|_copy$)', '', 'gi') AS stem
+            FROM information_schema.tables
+            WHERE table_schema NOT IN ('pg_catalog', 'information_schema')
+          )
+          SELECT stem, json_agg(json_build_object('schema', table_schema, 'table', table_name)) AS candidates
+          FROM t
+          GROUP BY stem
+          HAVING count(*) > 1;
+          " | tee duplicate_tables.txt
+
+          if [ -s duplicate_tables.txt ]; then
+            echo "### ⚠️ Duplicate Tables Detected" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat duplicate_tables.txt >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "::warning::Duplicate tables found - review duplicate_tables.txt"
+          else
+            echo "### ✅ No Duplicate Tables" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Check for RLS violations
+        env:
+          POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+        run: |
+          psql "$POSTGRES_URL" -t -c "
+          SELECT n.nspname AS schema, c.relname AS table
+          FROM pg_class c
+          JOIN pg_namespace n ON n.oid = c.relnamespace
+          WHERE n.nspname IN ('gold', 'platinum', 'public')
+            AND c.relkind = 'r'
+            AND c.relrowsecurity = true
+            AND NOT EXISTS(
+              SELECT 1 FROM pg_policies p
+              WHERE p.schemaname = n.nspname AND p.tablename = c.relname
+            );
+          " | tee rls_violations.txt
+
+          if [ -s rls_violations.txt ]; then
+            echo "### ⚠️ RLS Violations Detected" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat rls_violations.txt >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "::warning::Tables with RLS enabled but no policies - review rls_violations.txt"
+          else
+            echo "### ✅ No RLS Violations" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Check for column drift
+        env:
+          POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+        run: |
+          psql "$POSTGRES_URL" -t -c "
+          WITH column_stats AS (
+            SELECT column_name,
+                   COUNT(DISTINCT data_type) AS type_count,
+                   COUNT(DISTINCT is_nullable) AS nullable_count,
+                   json_agg(DISTINCT json_build_object(
+                     'schema', table_schema,
+                     'table', table_name,
+                     'type', data_type,
+                     'nullable', is_nullable
+                   )) AS occurrences
+            FROM information_schema.columns
+            WHERE table_schema NOT IN ('pg_catalog', 'information_schema')
+            GROUP BY column_name
+          )
+          SELECT column_name, occurrences
+          FROM column_stats
+          WHERE type_count > 1 OR nullable_count > 1;
+          " | tee column_drift.txt
+
+          if [ -s column_drift.txt ]; then
+            echo "### ⚠️ Column Drift Detected" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat column_drift.txt >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "::warning::Inconsistent column definitions - review column_drift.txt"
+          else
+            echo "### ✅ No Column Drift" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload schema guard reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: schema-guard-reports
+          path: |
+            duplicate_tables.txt
+            rls_violations.txt
+            column_drift.txt
+          retention-days: 30
+
+      - name: Create issue on violations
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let body = '## Schema Guard Violations Detected\n\n';
+
+            if (fs.existsSync('duplicate_tables.txt') && fs.statSync('duplicate_tables.txt').size > 0) {
+              body += '### Duplicate Tables\n```\n';
+              body += fs.readFileSync('duplicate_tables.txt', 'utf8');
+              body += '\n```\n\n';
+            }
+
+            if (fs.existsSync('rls_violations.txt') && fs.statSync('rls_violations.txt').size > 0) {
+              body += '### RLS Violations\n```\n';
+              body += fs.readFileSync('rls_violations.txt', 'utf8');
+              body += '\n```\n\n';
+            }
+
+            if (fs.existsSync('column_drift.txt') && fs.statSync('column_drift.txt').size > 0) {
+              body += '### Column Drift\n```\n';
+              body += fs.readFileSync('column_drift.txt', 'utf8');
+              body += '\n```\n\n';
+            }
+
+            body += `**Workflow Run**: [${context.runId}](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 Schema Guard: Violations Detected',
+              body: body,
+              labels: ['database', 'schema-drift', 'automated']
+            });

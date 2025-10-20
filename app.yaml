@@ -1,0 +1,95 @@
+# app.yaml - DigitalOcean App Platform specification for Odoo 18.0 + OCA
+name: odoo18-oca-enterprise
+region: nyc
+
+services:
+  # Odoo Application Server
+  - name: odoo
+    image:
+      registry_type: DOCKER_HUB
+      registry: odoo
+      repository: odoo
+      tag: "18.0"
+    instance_size_slug: professional-xs
+    instance_count: 1
+    http_port: 8069
+    health_check:
+      http_path: /web/health
+      initial_delay_seconds: 30
+      period_seconds: 10
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
+    envs:
+      - key: HOST
+        value: ${db.HOSTNAME}
+      - key: USER
+        value: ${db.USERNAME}
+      - key: PASSWORD
+        value: ${db.PASSWORD}
+      - key: PORT
+        value: ${db.PORT}
+      - key: ADMIN_PASSWORD
+        value: ${ADMIN_PASSWORD}
+        type: SECRET
+      - key: SUPABASE_URL
+        value: ${SUPABASE_URL}
+      - key: SUPABASE_ANON_KEY
+        value: ${SUPABASE_ANON_KEY}
+        type: SECRET
+    routes:
+      - path: /
+    run_command: odoo -c /etc/odoo/odoo.conf --proxy-mode
+
+databases:
+  # PostgreSQL Database
+  - name: db
+    engine: PG
+    version: "15"
+    size: db-s-1vcpu-1gb
+    num_nodes: 1
+
+workers:
+  # Background jobs worker (cron tasks)
+  - name: odoo-cron
+    image:
+      registry_type: DOCKER_HUB
+      registry: odoo
+      repository: odoo
+      tag: "18.0"
+    instance_size_slug: basic-xxs
+    instance_count: 1
+    run_command: odoo -c /etc/odoo/odoo.conf --max-cron-threads=2 --no-xmlrpc
+    envs:
+      - key: HOST
+        value: ${db.HOSTNAME}
+      - key: USER
+        value: ${db.USERNAME}
+      - key: PASSWORD
+        value: ${db.PASSWORD}
+      - key: PORT
+        value: ${db.PORT}
+
+jobs:
+  # Pre-deployment initialization job
+  - name: odoo-init
+    kind: PRE_DEPLOY
+    image:
+      registry_type: DOCKER_HUB
+      registry: odoo
+      repository: odoo
+      tag: "18.0"
+    run_command: |
+      odoo -c /etc/odoo/odoo.conf -d odoo18 -i base --stop-after-init --without-demo=all
+    envs:
+      - key: HOST
+        value: ${db.HOSTNAME}
+      - key: USER
+        value: ${db.USERNAME}
+      - key: PASSWORD
+        value: ${db.PASSWORD}
+      - key: PORT
+        value: ${db.PORT}
+      - key: ADMIN_PASSWORD
+        value: ${ADMIN_PASSWORD}
+        type: SECRET

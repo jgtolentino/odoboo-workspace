@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- OCR Dashboard Template -->
+    <template id="ocr_dashboard_template" name="OCR Audit Dashboard">
+        <t t-call="web.layout">
+            <t t-set="head">
+                <link rel="stylesheet" href="/hr_expense_ocr_audit/static/src/css/dashboard.css"/>
+                <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+            </t>
+
+            <div class="container-fluid ocr-dashboard">
+                <div class="row mt-4 mb-3">
+                    <div class="col-12">
+                        <h1 class="mb-0">
+                            <i class="fa fa-tachometer-alt"></i>
+                            OCR Audit Dashboard
+                        </h1>
+                        <p class="text-muted">Real-time expense document processing analytics</p>
+                    </div>
+                </div>
+
+                <!-- KPI Cards Row 1 -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card kpi-card">
+                            <div class="card-body">
+                                <div class="kpi-icon bg-primary">
+                                    <i class="fa fa-file-invoice"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <h5 class="text-muted">Total Expenses</h5>
+                                    <h2 class="mb-0" t-esc="metrics['total_expenses']">0</h2>
+                                    <small class="text-success">
+                                        <t t-esc="metrics['ocr_coverage_pct']">0</t>% with OCR
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="card kpi-card">
+                            <div class="card-body">
+                                <div class="kpi-icon bg-success">
+                                    <i class="fa fa-check-circle"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <h5 class="text-muted">Processed Today</h5>
+                                    <h2 class="mb-0" t-esc="metrics['today_processed']">0</h2>
+                                    <small class="text-muted">OCR completed</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="card kpi-card">
+                            <div class="card-body">
+                                <div class="kpi-icon bg-warning">
+                                    <i class="fa fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <h5 class="text-muted">Low Confidence</h5>
+                                    <h2 class="mb-0" t-esc="metrics['low_confidence_count']">0</h2>
+                                    <small class="text-muted">&lt;60% confidence</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="card kpi-card">
+                            <div class="card-body">
+                                <div class="kpi-icon bg-danger">
+                                    <i class="fa fa-flag"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <h5 class="text-muted">Anomalies Detected</h5>
+                                    <h2 class="mb-0" t-esc="metrics['anomaly_count']">0</h2>
+                                    <small class="text-muted">Requires review</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KPI Cards Row 2 -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card kpi-card">
+                            <div class="card-body">
+                                <div class="kpi-icon bg-info">
+                                    <i class="fa fa-percentage"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <h5 class="text-muted">Avg OCR Confidence</h5>
+                                    <h2 class="mb-0"><t t-esc="metrics['avg_confidence']">0</t>%</h2>
+                                    <small class="text-muted">Across all receipts</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="card kpi-card">
+                            <div class="card-body">
+                                <div class="kpi-icon bg-secondary">
+                                    <i class="fa fa-images"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <h5 class="text-muted">Avg Visual Similarity</h5>
+                                    <h2 class="mb-0"><t t-esc="metrics['avg_similarity']">0</t>%</h2>
+                                    <small class="text-muted">SSIM score</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="card kpi-card">
+                            <div class="card-body">
+                                <div class="kpi-icon bg-dark">
+                                    <i class="fa fa-exchange-alt"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <h5 class="text-muted">Visual Changes</h5>
+                                    <h2 class="mb-0" t-esc="metrics['visual_changes_count']">0</h2>
+                                    <small class="text-muted">Documents modified</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="card kpi-card">
+                            <div class="card-body">
+                                <div class="kpi-icon bg-success">
+                                    <i class="fa fa-sync"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <h5 class="text-muted">Auto-Refresh</h5>
+                                    <button class="btn btn-sm btn-primary mt-2" onclick="refreshDashboard()">
+                                        <i class="fa fa-refresh"></i> Refresh Now
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="row mb-4">
+                    <!-- Weekly Trend Chart -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-chart-line"></i>
+                                    Weekly Processing Trend
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="weeklyTrendChart" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Distribution Chart -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-chart-pie"></i>
+                                    OCR Status Distribution
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="statusChart" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Vendors & Recent Activity Row -->
+                <div class="row mb-4">
+                    <!-- Top Vendors -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-building"></i>
+                                    Top Vendors by Volume
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Vendor</th>
+                                            <th class="text-right">Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="metrics['top_vendors']" t-as="vendor">
+                                            <tr>
+                                                <td><t t-esc="vendor['vendor']">Unknown</t></td>
+                                                <td class="text-right">
+                                                    <span class="badge badge-primary">
+                                                        <t t-esc="vendor['count']">0</t>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                        <t t-if="not metrics['top_vendors']">
+                                            <tr>
+                                                <td colspan="2" class="text-center text-muted">
+                                                    No data available
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-history"></i>
+                                    Recent Activity
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="activity-feed">
+                                    <t t-foreach="metrics['recent_activity']" t-as="activity">
+                                        <div class="activity-item">
+                                            <div class="activity-icon">
+                                                <i class="fa fa-circle" t-att-class="'text-' + ('success' if activity['action'] == 'ocr_processed' else 'warning')"></i>
+                                            </div>
+                                            <div class="activity-content">
+                                                <p class="mb-1">
+                                                    <strong><t t-esc="activity['expense_name']">Expense</t></strong>
+                                                    - <t t-esc="activity['action']">action</t>
+                                                </p>
+                                                <small class="text-muted">
+                                                    <t t-esc="activity['date']">date</t> by <t t-esc="activity['user']">user</t>
+                                                    <t t-if="activity['confidence']">
+                                                        | Confidence: <t t-esc="activity['confidence']">0</t>%
+                                                    </t>
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </t>
+                                    <t t-if="not metrics['recent_activity']">
+                                        <p class="text-center text-muted">No recent activity</p>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- JavaScript for Charts -->
+                <script type="text/javascript">
+                    <![CDATA[
+                    // Weekly Trend Chart
+                    var weeklyCtx = document.getElementById('weeklyTrendChart').getContext('2d');
+                    var weeklyData = ]]><t t-out="json.dumps(metrics['weekly_trend'])"/><![CDATA[;
+
+                    new Chart(weeklyCtx, {
+                        type: 'line',
+                        data: {
+                            labels: weeklyData.map(d => d.date),
+                            datasets: [{
+                                label: 'OCR Processed',
+                                data: weeklyData.map(d => d.count),
+                                borderColor: '#007bff',
+                                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false }
+                            }
+                        }
+                    });
+
+                    // Status Distribution Chart
+                    var statusCtx = document.getElementById('statusChart').getContext('2d');
+                    var statusData = ]]><t t-out="json.dumps(metrics['status_distribution'])"/><![CDATA[;
+
+                    new Chart(statusCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: statusData.map(d => d.status),
+                            datasets: [{
+                                data: statusData.map(d => d.count),
+                                backgroundColor: [
+                                    '#ffc107', '#007bff', '#28a745', '#dc3545', '#6c757d'
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+
+                    // Auto-refresh dashboard
+                    function refreshDashboard() {
+                        location.reload();
+                    }
+
+                    // Auto-refresh every 5 minutes
+                    setInterval(refreshDashboard, 300000);
+                    ]]>
+                </script>
+            </div>
+        </t>
+    </template>
+
+    <!-- Menu Item for Dashboard -->
+    <menuitem id="menu_ocr_dashboard"
+              name="OCR Dashboard"
+              parent="hr_expense.menu_hr_expense_report"
+              action="action_ocr_dashboard"
+              sequence="1"/>
+
+    <!-- Action for Dashboard -->
+    <record id="action_ocr_dashboard" model="ir.actions.act_url">
+        <field name="name">OCR Audit Dashboard</field>
+        <field name="url">/hr_expense/ocr/dashboard</field>
+        <field name="target">self</field>
+    </record>
+
+</odoo>

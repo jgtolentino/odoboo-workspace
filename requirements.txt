@@ -1,0 +1,61 @@
+# requirements.txt - Python dependencies for Odoo 18.0 + OCA modules
+
+# Core Supabase integration
+supabase==2.0.0
+gotrue==1.3.0
+realtime==1.0.0
+websockets==12.0
+storage3==0.6.1
+postgrest==0.13.0
+
+# OCA Dependencies
+num2words==0.5.13
+xlsxwriter==3.1.9
+xlrd==2.0.1
+phonenumbers==8.13.26
+python-stdnum==1.19
+
+# Core Python libraries
+pytz
+python-dateutil
+pycountry==23.12.11
+cryptography
+pyOpenSSL
+qrcode[pil]
+vobject==0.9.6.1
+python-ldap
+passlib
+babel
+decorator
+docutils
+ebaysdk
+feedparser
+gevent
+greenlet
+html2text
+Jinja2
+lxml
+Mako
+MarkupSafe
+mock
+ofxparse
+Pillow
+psutil
+psycopg2-binary
+pydot
+pyparsing
+PyPDF2
+pyserial
+pyusb
+PyYAML
+reportlab
+requests
+zeep
+polib
+
+# Additional OCA module dependencies
+odoo-addon-base-rest>=18.0
+odoo-addon-component>=18.0
+odoo-addon-server-env>=18.0
+odoo-addon-queue-job>=18.0
+odoo-addon-web-responsive>=18.0

@@ -206,6 +206,46 @@ npm run package
 - **testImpact.ts**: Jest/Pytest changed test execution
 - **deploymentStatus.ts**: Deployment status refresh trigger
 
+## CI/CD Integration
+
+This repository includes GitHub Actions workflows that automatically integrate with the extension's functionality:
+
+### 1. VS Code Extension CI (`.github/workflows/vscode-extension-ci.yml`)
+- **Triggers**: Push/PR to `vscode-extension/**`
+- **Actions**: Lint, compile, package extension, upload VSIX artifact
+- **Auto-publish**: Creates GitHub release on version tags
+
+### 2. Deployment Monitor (`.github/workflows/deployment-monitor.yml`)
+- **Triggers**: Every 30 minutes, on push, manual dispatch
+- **Actions**: Health checks for Vercel, Supabase, GitHub Actions, DigitalOcean
+- **Notifications**: Creates issues on deployment failures
+
+### 3. Schema Guard (`.github/workflows/schema-guard.yml`)
+- **Triggers**: Daily at 2 AM UTC, on migrations changes
+- **Actions**: Detect duplicate tables, RLS violations, column drift
+- **Alerts**: Creates issues with violation details
+
+### 4. Visual Regression (`.github/workflows/visual-regression.yml`)
+- **Triggers**: PRs touching UI files, manual dispatch
+- **Actions**: Playwright screenshots, SSIM comparison, baseline management
+- **PR Comments**: Visual test results with diff count
+
+### Required Secrets
+Configure in GitHub Settings → Secrets and variables → Actions:
+
+```yaml
+Secrets:
+  VERCEL_TOKEN: Vercel API token
+  SUPABASE_ANON_KEY: Supabase anonymous key
+  POSTGRES_URL: PostgreSQL connection string
+  DO_ACCESS_TOKEN: DigitalOcean API token
+
+Variables:
+  VERCEL_PROJECT_ID: Vercel project ID
+  SUPABASE_PROJECT_REF: Supabase project reference
+  DO_APP_ID: DigitalOcean app ID
+```
+
 ## Troubleshooting
 
 ### "Not configured" status
@@ -227,6 +267,11 @@ npm run package
 - Check `supabase.connectionString` is valid
 - Verify PostgreSQL connection allows direct access
 - Ensure schemas (`bronze`, `silver`, `gold`, `platinum`) exist
+
+### GitHub Actions failing
+- Verify all secrets are configured in repository settings
+- Check workflow permissions: Settings → Actions → General → Workflow permissions
+- Review workflow logs for specific error messages
 
 ## License
 

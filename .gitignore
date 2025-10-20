@@ -1,30 +1,122 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+*.env
+!.env.example
 
-# dependencies
-/node_modules
+# Odoo Runtime Data
+/odoo-data/
+/filestore/
+/sessions/
+*.pyc
+*.pyo
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
 
-# next.js
-/.next/
-/out/
+# OCA Modules (downloaded, not tracked)
+/oca/*
+!/oca/.gitkeep
 
-# production
-/build
+# Logs
+*.log
+/logs/
+*.log.*
 
-# debug
+# IDE & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+
+# SSL Certificates
+*.pem
+*.key
+*.crt
+*.csr
+/ssl/*
+!/ssl/.gitkeep
+/nginx/ssl/*
+!/nginx/ssl/.gitkeep
+
+# Backups & Dumps
+/backups/
+*.dump
+*.sql
+*.tar.gz
+*.zip
+*.bak
+
+# Temporary Files
+*.tmp
+*.temp
+/tmp/
+.cache/
+
+# Node.js (if using any JS tools)
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
+package-lock.json
+yarn.lock
 
-# env files
-.env*
+# Python
+*.egg-info/
+dist/
+build/
+.eggs/
+pip-log.txt
+pip-delete-this-directory.txt
 
-# vercel
-.vercel
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+*.tfvars
+!example.tfvars
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# Kubernetes
+*.kubeconfig
 
-# local settings
-.claude/
+# OS Files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Compiled files
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Odoo Specific
+/addons/*/static/description/icon.png
+/addons/*/i18n/*.pot
