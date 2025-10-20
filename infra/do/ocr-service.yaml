@@ -9,7 +9,7 @@ services:
       branch: main
       deploy_on_push: true
     instance_count: 1
-    instance_size_slug: basic-xs
+    instance_size_slug: basic-s
     http_port: 8000
     health_check:
       http_path: /health
