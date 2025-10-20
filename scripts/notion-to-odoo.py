@@ -23,8 +23,8 @@ from html import unescape
 # Configuration from environment
 URL = os.getenv("ODOO_URL", "https://insightpulseai.net")
 DB = os.getenv("ODOO_DB", "insightpulse_prod")
-USER = os.getenv("ODOO_USER", "admin@example.com")
-PASS = os.getenv("ODOO_PASS")
+USER = os.getenv("ODOO_USER", "jgtolentino_rn@yahoo.com")
+PASS = os.getenv("ODOO_PASS", "Postgres_26")
 
 if not PASS:
     print("ERROR: ODOO_PASS environment variable not set")
