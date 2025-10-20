@@ -1,20 +1,117 @@
-name: DB - Staging
+name: DB - Staging Migration
+
 on:
   push:
     branches: [staging]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Run in dry-run mode (no changes applied)'
+        required: false
+        default: 'false'
+
 jobs:
   migrate-staging:
     runs-on: ubuntu-latest
+    environment: staging
+    timeout-minutes: 10
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Run migrations
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --only=production
+
+      - name: Validate migration files
+        run: |
+          echo "🔍 Validating migration files..."
+          if [ ! -d "scripts" ]; then
+            echo "❌ scripts directory not found"
+            exit 1
+          fi
+
+          migration_count=$(ls scripts/*.sql 2>/dev/null | wc -l)
+          echo "✓ Found $migration_count migration files"
+
+          if [ $migration_count -eq 0 ]; then
+            echo "⚠️  No migration files found - nothing to do"
+            exit 0
+          fi
+
+      - name: Run migrations (dry-run first)
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          NODE_ENV: staging
+        run: |
+          echo "🧪 Running dry-run first..."
+          node scripts/run-migrations.js --dry-run --verbose
+
+      - name: Run migrations (actual)
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          NODE_ENV: staging
+          GITHUB_ACTOR: ${{ github.actor }}
+        run: |
+          echo "🚀 Running migrations on STAGING..."
+          node scripts/run-migrations.js --verbose
+
+      - name: Verify migration status
+        if: success()
         env:
           DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
         run: |
-          if [ -f scripts/run-migrations.ts ]; then
-            node scripts/run-migrations.ts
-          elif command -v supabase >/dev/null 2>&1; then
-            supabase migration up
-          else
-            echo "Add your migration runner"; exit 1
-          fi
+          echo "✅ Checking migration status..."
+          node -e "
+          const { Client } = require('pg');
+          (async () => {
+            const client = new Client({ connectionString: process.env.DATABASE_URL });
+            await client.connect();
+            const result = await client.query('SELECT * FROM get_migration_status()');
+            console.log('Migration Status:', JSON.stringify(result.rows[0], null, 2));
+            await client.end();
+          })().catch(console.error);
+          "
+
+      - name: Rollback on failure
+        if: failure()
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        run: |
+          echo "❌ Migration failed - checking rollback options..."
+          echo "⚠️  Automatic rollback not implemented"
+          echo "ℹ️  Please restore from latest backup or manually revert"
+          echo "ℹ️  Check migration_history table for details"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Staging migration failed. Check logs and migration_history table."
+
+      - name: Comment PR with migration results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const output = `## 🗄️ Database Migration Results (Staging)
+
+            **Status**: ${{ job.status }}
+            **Trigger**: ${{ github.event_name }}
+            **Actor**: @${{ github.actor }}
+
+            Check the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });

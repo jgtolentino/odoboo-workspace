@@ -74,7 +74,8 @@
     "@langchain/community": "^0.3.19",
     "@langchain/openai": "^0.3.17",
     "pdf-parse": "^1.1.1",
-    "mammoth": "^1.9.0"
+    "mammoth": "^1.9.0",
+    "pg": "^8.11.3"
   },
   "devDependencies": {
     "@eslint/js": "9.38.0",
