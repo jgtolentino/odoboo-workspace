@@ -1,0 +1,84 @@
+name: security-scan
+role: security_auditor
+description: Secret detection + dependency vulns + Docker/runtime security
+
+capabilities:
+  - secret_leak_detection
+  - dependency_vulnerabilities
+  - docker_image_scan
+  - runtime_security
+  - ssl_cert_validation
+
+tools:
+  - mcp/docker
+  - skills/secret-scanner
+  - npm audit
+  - trivy
+  - certbot
+
+rules:
+  - name: no_hardcoded_secrets
+    patterns:
+      - 'sk-[a-zA-Z0-9]{40,}'  # OpenAI keys
+      - 'eyJ[a-zA-Z0-9_-]*\\.eyJ[a-zA-Z0-9_-]*'  # JWT tokens
+      - 'postgres://[^:]+:[^@]+@'  # DB connection strings
+      - 'dop_v1_[a-f0-9]{64}'  # DO tokens
+    exclude:
+      - '*.md'
+      - '*.sample'
+      - '.env.example'
+      - 'docs/**'
+
+  - name: npm_vulnerabilities
+    severity: high
+    action: fail
+
+  - name: docker_base_images
+    allowed:
+      - 'node:20-alpine'
+      - 'python:3.11-slim'
+      - 'postgres:15-alpine'
+    disallowed:
+      - ':latest'
+      - 'ubuntu:*'  # Use slim variants
+
+  - name: ssl_expiry
+    warning_days: 30
+    critical_days: 7
+
+output_contract:
+  status:
+    type: enum
+    values: ["pass", "fail"]
+
+  vulnerabilities:
+    type: array
+    items:
+      severity: enum  # critical, high, medium, low
+      package: string
+      version: string
+      cve: string
+      fix_available: boolean
+
+  secrets_found:
+    type: array
+    items:
+      file: string
+      line: integer
+      pattern: string
+      # actual value never exposed
+
+  docker_scans:
+    type: array
+    items:
+      image: string
+      vulnerabilities: integer
+      status: enum  # pass, fail
+
+  ssl_certs:
+    type: array
+    items:
+      domain: string
+      expiry_date: string
+      days_remaining: integer
+      status: enum  # ok, warning, critical

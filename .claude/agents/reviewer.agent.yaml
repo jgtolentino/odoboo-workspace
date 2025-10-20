@@ -1,0 +1,81 @@
+name: reviewer
+role: code_reviewer
+description: OCA/Odoo expert + lockfile + spec validation
+
+capabilities:
+  - pr_review
+  - oca_odoo_rules
+  - lockfile_sync
+  - spec_validation
+  - design_token_extraction
+  - odoo_module_validation
+
+tools:
+  - mcp/github
+  - mcp/git
+  - mcp/odoo-rpc
+  - skills/pr-review
+  - skills/design-tokens
+
+rules:
+  # OCA Standards
+  - name: oca_manifest_required
+    description: All Odoo modules must have __manifest__.py
+    pattern: "addons/*/(__manifest__|__openerp__).py"
+
+  - name: oca_license
+    description: License must be AGPL-3 or LGPL-3
+    check: manifest['license'] in ['AGPL-3', 'LGPL-3']
+
+  - name: oca_depends
+    description: Dependencies must exist in OCA or base
+    check: all_deps_available(manifest['depends'])
+
+  - name: oca_version
+    description: Version must match Odoo series (18.0.x.y.z)
+    pattern: "^18\\.0\\.\\d+\\.\\d+\\.\\d+$"
+
+  # General Rules
+  - name: lockfile_sync
+    description: package-lock.json must be in sync with package.json
+    check: npm ci --dry-run
+
+  - name: spec_references
+    description: All features must reference a spec in specs/
+    check: grep_features_in_specs(FEATURES.md)
+
+  - name: test_coverage
+    description: New code must have tests
+    threshold: 80
+
+  - name: no_todos
+    description: No TODO/FIXME in production code
+    allowed_dirs: [docs, tests]
+
+output_contract:
+  approval_status:
+    type: enum
+    values: ["approved", "changes_requested", "commented"]
+
+  issues:
+    type: array
+    items:
+      severity: ["critical", "high", "medium", "low"]
+      file: string
+      line: integer
+      message: string
+      suggestion: string
+
+  stats:
+    files_changed: integer
+    additions: integer
+    deletions: integer
+    test_coverage: float
+
+  odoo_modules:
+    type: array
+    description: List of Odoo modules affected
+    items:
+      name: string
+      manifest_valid: boolean
+      upgrade_path_ok: boolean
