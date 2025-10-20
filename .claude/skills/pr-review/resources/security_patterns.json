@@ -1,0 +1,43 @@
+{
+  "hardcoded_secrets": [
+    "(?i)(password|secret|key|token)\\s*[=:]\\s*[\"'][^\"']{8,}[\"']",
+    "(?i)api[_-]?key\\s*[=:]\\s*[\"'][^\"']+[\"']",
+    "(?i)bearer\\s+[a-zA-Z0-9\\-._~+/]+=*",
+    "(?i)aws[_-]?(access|secret)[_-]?key[_-]?id?\\s*[=:]",
+    "(?i)private[_-]?key\\s*[=:]\\s*[\"']",
+    "-----BEGIN (RSA|DSA|EC|OPENSSH) PRIVATE KEY-----"
+  ],
+  "sql_injection": [
+    "(?i)execute\\s*\\(\\s*[\"'].*?\\+.*?[\"']",
+    "(?i)query\\s*\\(\\s*[\"'].*?\\$\\{.*?\\}.*?[\"']",
+    "(?i)select.*?from.*?\\+",
+    "(?i)insert.*?values.*?\\+",
+    "(?i)update.*?set.*?\\+",
+    "(?i)delete.*?where.*?\\+"
+  ],
+  "xss_vulnerable": [
+    "(?i)innerHTML\\s*=",
+    "(?i)dangerouslySetInnerHTML",
+    "(?i)document\\.write\\s*\\(",
+    "(?i)eval\\s*\\(",
+    "(?i)\\.html\\s*\\(.*?\\+.*?\\)"
+  ],
+  "path_traversal": [
+    "(?i)fs\\.read.*?\\(.*?\\+",
+    "(?i)path\\.join\\s*\\(.*?req\\.",
+    "\\.\\./",
+    "(?i)file\\s*=\\s*request\\."
+  ],
+  "insecure_crypto": [
+    "(?i)crypto\\.createCipher\\s*\\(\\s*[\"']des[\"']",
+    "(?i)crypto\\.createCipher\\s*\\(\\s*[\"']rc4[\"']",
+    "(?i)md5\\s*\\(",
+    "(?i)sha1\\s*\\("
+  ],
+  "command_injection": [
+    "(?i)exec\\s*\\(.*?\\+",
+    "(?i)system\\s*\\(.*?\\+",
+    "(?i)shell_exec\\s*\\(.*?\\$",
+    "(?i)subprocess\\..*?shell\\s*=\\s*True"
+  ]
+}

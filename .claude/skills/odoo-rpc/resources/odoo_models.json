@@ -1,0 +1,139 @@
+{
+  "common_models": {
+    "res.partner": {
+      "description": "Contacts and companies",
+      "key_fields": ["name", "email", "phone", "is_company", "parent_id"],
+      "relationships": {
+        "user_ids": "res.users",
+        "child_ids": "res.partner",
+        "category_id": "res.partner.category"
+      }
+    },
+    "res.users": {
+      "description": "System users",
+      "key_fields": ["name", "login", "email", "active", "groups_id"],
+      "relationships": {
+        "partner_id": "res.partner",
+        "groups_id": "res.groups"
+      }
+    },
+    "res.company": {
+      "description": "Companies",
+      "key_fields": ["name", "email", "currency_id", "country_id"],
+      "relationships": {
+        "partner_id": "res.partner",
+        "currency_id": "res.currency"
+      }
+    },
+    "product.product": {
+      "description": "Product variants",
+      "key_fields": ["name", "default_code", "list_price", "type", "active"],
+      "relationships": {
+        "product_tmpl_id": "product.template",
+        "categ_id": "product.category"
+      }
+    },
+    "product.template": {
+      "description": "Product templates",
+      "key_fields": ["name", "list_price", "type", "uom_id", "categ_id"],
+      "relationships": {
+        "product_variant_ids": "product.product",
+        "categ_id": "product.category"
+      }
+    },
+    "sale.order": {
+      "description": "Sales orders",
+      "key_fields": ["name", "partner_id", "date_order", "amount_total", "state"],
+      "relationships": {
+        "partner_id": "res.partner",
+        "order_line": "sale.order.line",
+        "invoice_ids": "account.move"
+      },
+      "states": ["draft", "sent", "sale", "done", "cancel"]
+    },
+    "sale.order.line": {
+      "description": "Sales order lines",
+      "key_fields": ["product_id", "product_uom_qty", "price_unit", "order_id"],
+      "relationships": {
+        "order_id": "sale.order",
+        "product_id": "product.product"
+      }
+    },
+    "purchase.order": {
+      "description": "Purchase orders",
+      "key_fields": ["name", "partner_id", "date_order", "amount_total", "state"],
+      "relationships": {
+        "partner_id": "res.partner",
+        "order_line": "purchase.order.line"
+      },
+      "states": ["draft", "sent", "to approve", "purchase", "done", "cancel"]
+    },
+    "account.move": {
+      "description": "Invoices and journal entries",
+      "key_fields": ["name", "partner_id", "invoice_date", "amount_total", "state"],
+      "relationships": {
+        "partner_id": "res.partner",
+        "invoice_line_ids": "account.move.line"
+      },
+      "states": ["draft", "posted", "cancel"]
+    },
+    "stock.picking": {
+      "description": "Transfers/Deliveries",
+      "key_fields": ["name", "partner_id", "scheduled_date", "state", "picking_type_id"],
+      "relationships": {
+        "partner_id": "res.partner",
+        "move_ids": "stock.move",
+        "picking_type_id": "stock.picking.type"
+      },
+      "states": ["draft", "waiting", "confirmed", "assigned", "done", "cancel"]
+    },
+    "hr.employee": {
+      "description": "Employees",
+      "key_fields": ["name", "work_email", "department_id", "job_id", "active"],
+      "relationships": {
+        "user_id": "res.users",
+        "department_id": "hr.department",
+        "job_id": "hr.job"
+      }
+    },
+    "project.project": {
+      "description": "Projects",
+      "key_fields": ["name", "partner_id", "date_start", "date", "active"],
+      "relationships": {
+        "partner_id": "res.partner",
+        "task_ids": "project.task",
+        "user_id": "res.users"
+      }
+    },
+    "project.task": {
+      "description": "Project tasks",
+      "key_fields": ["name", "project_id", "user_ids", "date_deadline", "stage_id"],
+      "relationships": {
+        "project_id": "project.project",
+        "user_ids": "res.users",
+        "stage_id": "project.task.type"
+      }
+    },
+    "crm.lead": {
+      "description": "Leads/Opportunities",
+      "key_fields": ["name", "partner_id", "expected_revenue", "probability", "stage_id"],
+      "relationships": {
+        "partner_id": "res.partner",
+        "user_id": "res.users",
+        "stage_id": "crm.stage"
+      }
+    }
+  },
+  "odoo_19_modules": [
+    "base",
+    "sale_management",
+    "purchase",
+    "stock",
+    "account",
+    "hr",
+    "project",
+    "crm",
+    "website",
+    "ecommerce"
+  ]
+}

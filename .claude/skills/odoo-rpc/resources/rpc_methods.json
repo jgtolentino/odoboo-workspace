@@ -1,0 +1,75 @@
+{
+  "common_methods": {
+    "search": {
+      "description": "Search for record IDs",
+      "parameters": ["domain", "offset", "limit", "order", "count"],
+      "returns": "List[int]"
+    },
+    "search_read": {
+      "description": "Search and read records in one call",
+      "parameters": ["domain", "fields", "offset", "limit", "order"],
+      "returns": "List[Dict]"
+    },
+    "read": {
+      "description": "Read records by IDs",
+      "parameters": ["ids", "fields"],
+      "returns": "List[Dict]"
+    },
+    "create": {
+      "description": "Create new record",
+      "parameters": ["values"],
+      "returns": "int (new ID)"
+    },
+    "write": {
+      "description": "Update existing records",
+      "parameters": ["ids", "values"],
+      "returns": "bool"
+    },
+    "unlink": {
+      "description": "Delete records",
+      "parameters": ["ids"],
+      "returns": "bool"
+    },
+    "name_get": {
+      "description": "Get display name for records",
+      "parameters": ["ids"],
+      "returns": "List[Tuple[int, str]]"
+    },
+    "name_search": {
+      "description": "Search by name",
+      "parameters": ["name", "args", "operator", "limit"],
+      "returns": "List[Tuple[int, str]]"
+    },
+    "fields_get": {
+      "description": "Get field definitions",
+      "parameters": ["allfields", "attributes"],
+      "returns": "Dict[str, Dict]"
+    },
+    "search_count": {
+      "description": "Count records matching domain",
+      "parameters": ["domain"],
+      "returns": "int"
+    },
+    "default_get": {
+      "description": "Get default values for fields",
+      "parameters": ["fields_list"],
+      "returns": "Dict"
+    },
+    "copy": {
+      "description": "Duplicate record",
+      "parameters": ["id", "default"],
+      "returns": "int (new ID)"
+    }
+  },
+  "workflow_methods": {
+    "sale.order": ["action_confirm", "action_cancel", "action_draft", "_create_invoices"],
+    "account.move": ["action_post", "button_cancel", "button_draft"],
+    "stock.picking": ["action_confirm", "action_assign", "button_validate", "action_cancel"],
+    "purchase.order": ["button_confirm", "button_approve", "button_cancel"]
+  },
+  "compute_methods": {
+    "product.product": ["_compute_product_price"],
+    "sale.order": ["_amount_all", "_compute_tax_totals"],
+    "account.move": ["_compute_amount"]
+  }
+}

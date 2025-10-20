@@ -1,0 +1,124 @@
+{
+  "security_checklist": [
+    {
+      "category": "authentication",
+      "checks": [
+        "Password hashing uses bcrypt/argon2/scrypt",
+        "JWT tokens have expiration",
+        "Session management is secure",
+        "No hardcoded credentials",
+        "API keys stored in environment variables"
+      ]
+    },
+    {
+      "category": "input_validation",
+      "checks": [
+        "All user inputs are validated",
+        "SQL queries use parameterization",
+        "File uploads have size/type restrictions",
+        "XSS prevention on output",
+        "CSRF tokens on state-changing operations"
+      ]
+    },
+    {
+      "category": "data_protection",
+      "checks": [
+        "Sensitive data encrypted at rest",
+        "HTTPS enforced",
+        "No sensitive data in logs",
+        "PII handling complies with regulations",
+        "Secure cookie flags set"
+      ]
+    }
+  ],
+  "quality_checklist": [
+    {
+      "category": "code_structure",
+      "checks": [
+        "Functions are single-purpose",
+        "Cyclomatic complexity < 10",
+        "No duplicate code",
+        "Proper error handling",
+        "Consistent naming conventions"
+      ]
+    },
+    {
+      "category": "testing",
+      "checks": [
+        "Unit tests for new functions",
+        "Integration tests for APIs",
+        "Edge cases covered",
+        "Test coverage > 80%",
+        "No skipped/disabled tests"
+      ]
+    },
+    {
+      "category": "documentation",
+      "checks": [
+        "Public APIs documented",
+        "Complex logic explained",
+        "README updated if needed",
+        "CHANGELOG updated",
+        "Breaking changes noted"
+      ]
+    }
+  ],
+  "performance_checklist": [
+    {
+      "category": "efficiency",
+      "checks": [
+        "No N+1 queries",
+        "Proper database indexing",
+        "Caching where appropriate",
+        "Async operations for I/O",
+        "Resource cleanup (files, connections)"
+      ]
+    },
+    {
+      "category": "scalability",
+      "checks": [
+        "No hardcoded limits",
+        "Pagination for large datasets",
+        "Rate limiting implemented",
+        "Memory usage optimized",
+        "Database connection pooling"
+      ]
+    }
+  ],
+  "odoo_specific_checklist": [
+    {
+      "category": "odoo_patterns",
+      "checks": [
+        "Proper use of ORM methods",
+        "Security groups defined",
+        "Access rights configured",
+        "Computed fields have proper dependencies",
+        "No sudo() without justification"
+      ]
+    },
+    {
+      "category": "odoo_migrations",
+      "checks": [
+        "Migration scripts for schema changes",
+        "Data migration tested",
+        "Backward compatibility considered",
+        "Module dependencies updated",
+        "XML IDs follow conventions"
+      ]
+    }
+  ],
+  "review_priorities": {
+    "p0_critical": [
+      "Security vulnerabilities",
+      "Data loss risks",
+      "Breaking changes without migration"
+    ],
+    "p1_high": [
+      "Performance degradation",
+      "Missing tests for core functionality",
+      "API contract changes"
+    ],
+    "p2_medium": ["Code quality issues", "Incomplete documentation", "Minor performance issues"],
+    "p3_low": ["Style violations", "Nitpicks", "Suggestions for improvement"]
+  }
+}

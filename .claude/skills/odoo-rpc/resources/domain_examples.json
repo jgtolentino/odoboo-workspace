@@ -1,0 +1,139 @@
+{
+  "basic_domains": {
+    "equality": {
+      "description": "Field equals value",
+      "domain": [["field_name", "=", "value"]],
+      "example": [["name", "=", "John Doe"]]
+    },
+    "inequality": {
+      "description": "Field not equals value",
+      "domain": [["field_name", "!=", "value"]],
+      "example": [["state", "!=", "cancel"]]
+    },
+    "greater_than": {
+      "description": "Numeric comparison",
+      "domain": [["field_name", ">", 100]],
+      "example": [["amount_total", ">", 1000.0]]
+    },
+    "contains": {
+      "description": "Case-insensitive substring",
+      "domain": [["field_name", "ilike", "%pattern%"]],
+      "example": [["name", "ilike", "%ACME%"]]
+    },
+    "in_list": {
+      "description": "Field value in list",
+      "domain": [["field_name", "in", ["value1", "value2"]]],
+      "example": [["state", "in", ["draft", "sent"]]]
+    }
+  },
+  "compound_domains": {
+    "and_implicit": {
+      "description": "AND operator (implicit)",
+      "domain": [
+        ["field1", "=", "value1"],
+        ["field2", "=", "value2"]
+      ],
+      "example": [
+        ["is_company", "=", true],
+        ["country_id", "=", 1]
+      ]
+    },
+    "or_explicit": {
+      "description": "OR operator (explicit)",
+      "domain": ["|", ["field1", "=", "value1"], ["field2", "=", "value2"]],
+      "example": ["|", ["name", "ilike", "John"], ["email", "ilike", "@example.com"]]
+    },
+    "complex_and_or": {
+      "description": "Complex AND/OR combination",
+      "domain": [
+        "&",
+        ["active", "=", true],
+        "|",
+        ["name", "ilike", "ACME"],
+        ["email", "ilike", "@acme.com"]
+      ],
+      "explanation": "active AND (name LIKE 'ACME' OR email LIKE '@acme.com')"
+    },
+    "not_operator": {
+      "description": "NOT operator",
+      "domain": ["!", ["state", "=", "cancel"]],
+      "explanation": "state != 'cancel'"
+    }
+  },
+  "real_world_examples": {
+    "active_companies": {
+      "description": "Find active companies",
+      "domain": [
+        ["is_company", "=", true],
+        ["active", "=", true]
+      ]
+    },
+    "recent_orders": {
+      "description": "Orders from last 30 days",
+      "domain": [
+        ["date_order", ">=", "2025-09-21"],
+        ["state", "in", ["sale", "done"]]
+      ]
+    },
+    "unpaid_invoices": {
+      "description": "Unpaid customer invoices",
+      "domain": [
+        ["move_type", "=", "out_invoice"],
+        ["payment_state", "!=", "paid"],
+        ["state", "=", "posted"]
+      ]
+    },
+    "available_products": {
+      "description": "Sellable products with stock",
+      "domain": [
+        ["sale_ok", "=", true],
+        ["active", "=", true],
+        ["qty_available", ">", 0]
+      ]
+    },
+    "assigned_tasks": {
+      "description": "Tasks assigned to user",
+      "domain": [
+        ["user_ids", "in", [1]],
+        ["stage_id.is_closed", "=", false]
+      ]
+    }
+  },
+  "relational_domains": {
+    "many2one_field": {
+      "description": "Filter by related record field",
+      "domain": [["partner_id.country_id.code", "=", "US"]],
+      "explanation": "Partner's country code is US"
+    },
+    "one2many_field": {
+      "description": "Filter by child records",
+      "domain": [["order_line.product_id.categ_id", "=", 1]],
+      "explanation": "Has order line with product in category 1"
+    },
+    "many2many_field": {
+      "description": "Filter by many2many relationship",
+      "domain": [["category_id", "in", [1, 2, 3]]],
+      "explanation": "Has any of the specified categories"
+    }
+  },
+  "date_domains": {
+    "today": {
+      "description": "Records created today",
+      "domain": [["create_date", ">=", "${today}"]]
+    },
+    "this_month": {
+      "description": "Records from current month",
+      "domain": [
+        ["create_date", ">=", "${month_start}"],
+        ["create_date", "<=", "${month_end}"]
+      ]
+    },
+    "date_range": {
+      "description": "Records in date range",
+      "domain": [
+        ["date_order", ">=", "2025-01-01"],
+        ["date_order", "<=", "2025-12-31"]
+      ]
+    }
+  }
+}

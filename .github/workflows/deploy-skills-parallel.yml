@@ -1,0 +1,426 @@
+name: Deploy Skills (Parallel)
+
+on:
+  workflow_dispatch:
+    inputs:
+      skills:
+        description: 'Skills to deploy (comma-separated, leave empty for all)'
+        required: false
+        default: ''
+      force_rebuild:
+        description: 'Force rebuild all skills'
+        required: false
+        type: boolean
+        default: false
+
+  push:
+    branches:
+      - 'skill/**'
+    paths:
+      - 'services/agent-service/skills/**'
+      - 'infra/do-gradient/**'
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'services/agent-service/skills/**'
+      - 'infra/do-gradient/**'
+
+env:
+  DO_REGION: sgp
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  detect-changes:
+    name: Detect Changed Skills
+    runs-on: ubuntu-latest
+    outputs:
+      skills: ${{ steps.detect.outputs.skills }}
+      matrix: ${{ steps.detect.outputs.matrix }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed skills
+        id: detect
+        run: |
+          if [ "${{ github.event.inputs.skills }}" != "" ]; then
+            # Manual trigger with specific skills
+            SKILLS="${{ github.event.inputs.skills }}"
+            echo "Skills from input: $SKILLS"
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            # Detect from push to skill branches
+            BRANCH_NAME="${{ github.ref_name }}"
+            if [[ $BRANCH_NAME == skill/* ]]; then
+              SKILL_NAME="${BRANCH_NAME#skill/}"
+              SKILLS="$SKILL_NAME"
+              echo "Skills from branch: $SKILLS"
+            else
+              SKILLS=""
+            fi
+          else
+            # Detect from changed files
+            CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^services/agent-service/skills/' | cut -d'/' -f4 | sort -u | tr '\n' ',' | sed 's/,$//')
+            SKILLS="$CHANGED_FILES"
+            echo "Skills from changed files: $SKILLS"
+          fi
+
+          if [ -z "$SKILLS" ]; then
+            # Default: deploy all skills
+            SKILLS="pr-review,odoo-rpc,nl-sql,visual-diff,design-tokens"
+            echo "No specific skills detected, deploying all: $SKILLS"
+          fi
+
+          # Convert comma-separated list to JSON array
+          SKILLS_ARRAY=$(echo "$SKILLS" | jq -R 'split(",") | map(select(length > 0))')
+          echo "skills=$SKILLS" >> $GITHUB_OUTPUT
+          echo "matrix={\"skill\":$(echo $SKILLS_ARRAY)}" >> $GITHUB_OUTPUT
+
+          echo "Final skills matrix: $SKILLS_ARRAY"
+
+  validate-skills:
+    name: Validate ${{ matrix.skill }}
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.skills != ''
+    strategy:
+      matrix: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+      fail-fast: false
+      max-parallel: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r services/agent-service/requirements.txt
+          pip install pytest pytest-asyncio httpx
+
+      - name: Validate skill structure
+        run: |
+          SKILL_DIR="services/agent-service/skills/${{ matrix.skill }}"
+
+          if [ ! -d "$SKILL_DIR" ]; then
+            echo "❌ Error: Skill directory not found: $SKILL_DIR"
+            exit 1
+          fi
+
+          # Check required files
+          REQUIRED_FILES=(
+            "$SKILL_DIR/manifest.json"
+            "$SKILL_DIR/README.md"
+          )
+
+          for file in "${REQUIRED_FILES[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "⚠️  Warning: Missing file: $file"
+            fi
+          done
+
+          echo "✅ Skill structure validated: ${{ matrix.skill }}"
+
+      - name: Lint Python code
+        run: |
+          pip install ruff
+          ruff check services/agent-service/skills/${{ matrix.skill }}/ || true
+
+      - name: Run skill tests
+        run: |
+          SKILL_DIR="services/agent-service/skills/${{ matrix.skill }}"
+          if [ -d "$SKILL_DIR/tests" ]; then
+            pytest "$SKILL_DIR/tests/" -v
+          else
+            echo "⚠️  No tests found for ${{ matrix.skill }}"
+          fi
+
+  build-skills:
+    name: Build ${{ matrix.skill }}
+    runs-on: ubuntu-latest
+    needs: [detect-changes, validate-skills]
+    if: needs.detect-changes.outputs.skills != ''
+    strategy:
+      matrix: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+      fail-fast: false
+      max-parallel: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build skill image
+        run: |
+          SKILL_DIR="services/agent-service/skills/${{ matrix.skill }}"
+
+          # Create Dockerfile if not exists
+          if [ ! -f "$SKILL_DIR/Dockerfile" ]; then
+            cat > "$SKILL_DIR/Dockerfile" << 'EOF'
+          FROM python:3.11-slim
+
+          WORKDIR /app
+
+          COPY requirements.txt .
+          RUN pip install --no-cache-dir -r requirements.txt
+
+          COPY . .
+
+          EXPOSE 8080
+
+          CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+          EOF
+          fi
+
+          # Build image
+          docker build -t "odoobo-skill-${{ matrix.skill }}:latest" "$SKILL_DIR"
+
+          echo "✅ Skill image built: ${{ matrix.skill }}"
+
+      - name: Test skill container
+        run: |
+          # Run container in background
+          docker run -d --name "test-${{ matrix.skill }}" -p 8080:8080 \
+            -e SKILL_ID="${{ matrix.skill }}" \
+            "odoobo-skill-${{ matrix.skill }}:latest"
+
+          # Wait for container to start
+          sleep 10
+
+          # Check health endpoint
+          if curl -sf http://localhost:8080/health > /dev/null; then
+            echo "✅ Health check passed: ${{ matrix.skill }}"
+          else
+            echo "❌ Health check failed: ${{ matrix.skill }}"
+            docker logs "test-${{ matrix.skill }}"
+            exit 1
+          fi
+
+          # Stop and remove container
+          docker stop "test-${{ matrix.skill }}"
+          docker rm "test-${{ matrix.skill }}"
+
+  deploy-skills:
+    name: Deploy ${{ matrix.skill }} to DO
+    runs-on: ubuntu-latest
+    needs: [detect-changes, validate-skills, build-skills]
+    if: |
+      needs.detect-changes.outputs.skills != '' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    strategy:
+      matrix: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+      fail-fast: false
+      max-parallel: 5
+    environment:
+      name: production
+      url: https://odoobo-skill-${{ matrix.skill }}.ondigitalocean.app
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_ACCESS_TOKEN }}
+
+      - name: Create or update app spec
+        run: |
+          SKILL_DIR="services/agent-service/skills/${{ matrix.skill }}"
+          APP_SPEC_FILE="infra/do-gradient/${{ matrix.skill }}/app-spec.yaml"
+
+          mkdir -p "$(dirname "$APP_SPEC_FILE")"
+
+          cat > "$APP_SPEC_FILE" << EOF
+          name: odoobo-skill-${{ matrix.skill }}
+          region: ${{ env.DO_REGION }}
+          features:
+            - buildpack-stack=ubuntu-22
+
+          services:
+            - name: ${{ matrix.skill }}
+              github:
+                repo: ${{ github.repository }}
+                branch: ${{ github.ref_name }}
+                deploy_on_push: true
+              source_dir: /services/agent-service/skills/${{ matrix.skill }}
+
+              build_command: |
+                pip install -r requirements.txt
+
+              run_command: uvicorn main:app --host 0.0.0.0 --port 8080
+
+              http_port: 8080
+
+              instance_count: 1
+              instance_size_slug: apps-s-1vcpu-0.5gb
+
+              health_check:
+                http_path: /health
+                initial_delay_seconds: 30
+                period_seconds: 10
+                timeout_seconds: 5
+                success_threshold: 1
+                failure_threshold: 3
+
+              routes:
+                - path: /
+
+              envs:
+                - key: SKILL_ID
+                  value: ${{ matrix.skill }}
+                - key: ANTHROPIC_API_KEY
+                  value: \${{ secrets.ANTHROPIC_API_KEY }}
+                  type: SECRET
+                - key: OPENAI_API_KEY
+                  value: \${{ secrets.OPENAI_API_KEY }}
+                  type: SECRET
+                - key: GITHUB_TOKEN
+                  value: \${{ secrets.GITHUB_TOKEN }}
+                  type: SECRET
+                - key: SUPABASE_URL
+                  value: \${{ secrets.SUPABASE_URL }}
+                  type: SECRET
+                - key: SUPABASE_SERVICE_ROLE_KEY
+                  value: \${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+                  type: SECRET
+
+          alerts:
+            - rule: DEPLOYMENT_FAILED
+            - rule: DOMAIN_FAILED
+          EOF
+
+          echo "✅ App spec created: $APP_SPEC_FILE"
+
+      - name: Deploy to DigitalOcean App Platform
+        id: deploy
+        run: |
+          APP_NAME="odoobo-skill-${{ matrix.skill }}"
+          APP_SPEC_FILE="infra/do-gradient/${{ matrix.skill }}/app-spec.yaml"
+
+          # Check if app exists
+          APP_ID=$(doctl apps list --format ID,Spec.Name --no-header | grep "$APP_NAME" | awk '{print $1}' || echo "")
+
+          if [ -n "$APP_ID" ]; then
+            echo "🔄 Updating existing app (ID: $APP_ID)..."
+            doctl apps update "$APP_ID" --spec "$APP_SPEC_FILE"
+
+            if [ "${{ github.event.inputs.force_rebuild }}" = "true" ]; then
+              echo "🚀 Force rebuilding..."
+              doctl apps create-deployment "$APP_ID" --force-rebuild
+            else
+              echo "🚀 Triggering deployment..."
+              doctl apps create-deployment "$APP_ID"
+            fi
+          else
+            echo "🆕 Creating new app..."
+            doctl apps create --spec "$APP_SPEC_FILE"
+            APP_ID=$(doctl apps list --format ID,Spec.Name --no-header | grep "$APP_NAME" | awk '{print $1}')
+          fi
+
+          echo "app_id=$APP_ID" >> $GITHUB_OUTPUT
+          echo "✅ Deployment initiated: ${{ matrix.skill }}"
+
+      - name: Wait for deployment
+        run: |
+          APP_ID="${{ steps.deploy.outputs.app_id }}"
+          MAX_WAIT=600  # 10 minutes
+          ELAPSED=0
+
+          echo "⏳ Waiting for deployment to complete..."
+
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            STATUS=$(doctl apps get "$APP_ID" --format ActiveDeployment.Phase --no-header)
+
+            echo "  Status: $STATUS (${ELAPSED}s elapsed)"
+
+            if [ "$STATUS" = "ACTIVE" ]; then
+              echo "✅ Deployment successful!"
+              exit 0
+            elif [ "$STATUS" = "ERROR" ] || [ "$STATUS" = "CANCELED" ]; then
+              echo "❌ Deployment failed: $STATUS"
+              doctl apps logs "$APP_ID" --type=deploy --tail=50
+              exit 1
+            fi
+
+            sleep 10
+            ELAPSED=$((ELAPSED + 10))
+          done
+
+          echo "❌ Deployment timeout after ${MAX_WAIT}s"
+          exit 1
+
+      - name: Verify deployment health
+        run: |
+          APP_ID="${{ steps.deploy.outputs.app_id }}"
+          APP_URL=$(doctl apps get "$APP_ID" --format DefaultIngress --no-header)
+
+          echo "🏥 Verifying deployment health..."
+          echo "  URL: https://$APP_URL"
+
+          # Test health endpoint
+          MAX_RETRIES=5
+          RETRY=0
+
+          while [ $RETRY -lt $MAX_RETRIES ]; do
+            if curl -sf "https://$APP_URL/health" > /dev/null; then
+              echo "✅ Health check passed!"
+              curl -s "https://$APP_URL/health" | jq '.'
+              exit 0
+            fi
+
+            RETRY=$((RETRY + 1))
+            echo "  Retry $RETRY/$MAX_RETRIES..."
+            sleep 5
+          done
+
+          echo "❌ Health check failed after $MAX_RETRIES retries"
+          exit 1
+
+  notify-completion:
+    name: Notify Deployment Completion
+    runs-on: ubuntu-latest
+    needs: [detect-changes, deploy-skills]
+    if: always()
+    steps:
+      - name: Summary
+        run: |
+          echo "═══════════════════════════════════════════════════════════"
+          echo "  🎉 Parallel Deployment Complete!"
+          echo "═══════════════════════════════════════════════════════════"
+          echo ""
+          echo "Skills deployed: ${{ needs.detect-changes.outputs.skills }}"
+          echo "Deployment result: ${{ needs.deploy-skills.result }}"
+          echo ""
+          echo "🔍 Check deployment status:"
+          echo "  doctl apps list"
+          echo ""
+
+      - name: Create deployment artifact
+        run: |
+          mkdir -p deployment-report
+
+          cat > deployment-report/summary.json << EOF
+          {
+            "deployment_id": "${{ github.run_id }}",
+            "triggered_by": "${{ github.event_name }}",
+            "branch": "${{ github.ref_name }}",
+            "commit": "${{ github.sha }}",
+            "skills": "${{ needs.detect-changes.outputs.skills }}",
+            "result": "${{ needs.deploy-skills.result }}",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+
+      - name: Upload deployment report
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-report-${{ github.run_id }}
+          path: deployment-report/
+          retention-days: 30
