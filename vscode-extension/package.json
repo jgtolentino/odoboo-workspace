@@ -20,12 +20,7 @@
     "monitoring"
   ],
   "activationEvents": [
-    "onCommand:odoo.launch",
-    "onCommand:odoo.rpcConsole",
-    "onCommand:db.schemaGuard",
-    "onCommand:qa.snapshot",
-    "onCommand:test.impact",
-    "onCommand:platform.checkStatus"
+    "onStartupFinished"
   ],
   "main": "./dist/extension.js",
   "contributes": {

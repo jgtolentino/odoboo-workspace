@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 import logging
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from PIL import Image
 import numpy as np
 from paddleocr import PaddleOCR
