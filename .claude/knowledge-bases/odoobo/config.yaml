@@ -1,0 +1,143 @@
+# DO Gradient AI Knowledge Base Configuration
+# Optimized for local development with production migration path
+# Based on Anthropic context engineering best practices
+
+version: '1.0'
+name: 'odoobo-expert-kb'
+description: 'Odoo and OCA knowledge base with semantic search'
+
+# Context Engineering: "smallest possible set of high-signal tokens"
+embedding:
+  local:
+    provider: 'chromadb'
+    model: 'sentence-transformers/all-MiniLM-L6-v2'
+    dimensions: 384
+    similarity: 'cosine'
+    storage: '~/.claude/knowledge-bases/odoobo/embeddings/'
+
+  production:
+    provider: 'digitalocean-gradient-ai'
+    model: 'text-embedding-ada-002'
+    dimensions: 1536
+    similarity: 'cosine'
+    region: 'sgp' # Singapore
+
+# Data Sources (Progressive Disclosure)
+sources:
+  # Core Odoo Documentation (15K chunks)
+  - name: 'odoo-official-docs'
+    type: 'web'
+    urls:
+      - 'https://www.odoo.com/documentation/18.0/developer/'
+      - 'https://www.odoo.com/documentation/18.0/administration/'
+    chunking:
+      strategy: 'semantic'
+      size: 512
+      overlap: 50
+    priority: 1
+
+  # OCA Guidelines (5K chunks)
+  - name: 'oca-maintainer-tools'
+    type: 'web'
+    urls:
+      - 'https://github.com/OCA/maintainer-tools/wiki'
+      - 'https://github.com/OCA/odoo-community.org/wiki'
+    chunking:
+      strategy: 'markdown-headers'
+      size: 512
+      overlap: 50
+    priority: 1
+
+  # Community Forums (5K chunks)
+  - name: 'odoo-forums'
+    type: 'web'
+    urls:
+      - 'https://www.odoo.com/forum/help-1'
+    chunking:
+      strategy: 'paragraph'
+      size: 256
+      overlap: 25
+    priority: 2
+
+  # Local Custom Documentation (2K chunks)
+  - name: 'custom-docs'
+    type: 'local'
+    path: '~/.claude/knowledge-bases/odoobo/docs/'
+    formats: ['.md', '.txt', '.pdf']
+    chunking:
+      strategy: 'markdown-headers'
+      size: 512
+      overlap: 50
+    priority: 1
+
+  # Skills Documentation (Self-referential)
+  - name: 'skills-docs'
+    type: 'local'
+    path: '.claude/skills/'
+    formats: ['.md']
+    chunking:
+      strategy: 'code-blocks'
+      size: 256
+      overlap: 25
+    priority: 1
+
+# Retrieval Strategy (Hybrid: Semantic + Keyword)
+retrieval:
+  strategy: 'hybrid'
+  semantic_weight: 0.7
+  keyword_weight: 0.3
+  top_k: 5
+  min_score: 0.7
+  reranking:
+    enabled: true
+    model: 'cross-encoder/ms-marco-MiniLM-L-6-v2'
+
+# Context Management (Anthropic Best Practices)
+context:
+  max_tokens: 8000
+  compaction_threshold: 6000
+  summarization:
+    enabled: true
+    model: 'claude-3-haiku-20240307'
+    strategy: 'structured-notes'
+
+# Caching (Cost Optimization)
+cache:
+  enabled: true
+  ttl: 3600 # 1 hour
+  max_size: 100 # MB
+  strategy: 'lru'
+
+# Indexing
+indexing:
+  schedule: 'manual' # Local development
+  production_schedule: '0 2 * * *' # 2 AM daily in production
+  batch_size: 100
+  max_workers: 4
+
+# Cost Management
+cost:
+  local_dev: 0 # Free
+  production_monthly: 3 # USD
+  embedding_cost_per_1k: 0.0001
+  query_cost_per_1k: 0.0001
+  budget_alert_threshold: 5 # USD/month
+
+# Monitoring
+monitoring:
+  metrics:
+    - query_latency
+    - retrieval_accuracy
+    - cache_hit_rate
+    - token_usage
+  logging:
+    level: 'INFO'
+    format: 'json'
+    destination: '~/.claude/knowledge-bases/odoobo/logs/'
+
+# Migration Path (Local → Production)
+migration:
+  export_command: 'python scripts/export_embeddings.py --output embeddings_export.json'
+  upload_command: 'python scripts/upload_to_do_gradient.py --input embeddings_export.json'
+  validation: true
+  rollback: true

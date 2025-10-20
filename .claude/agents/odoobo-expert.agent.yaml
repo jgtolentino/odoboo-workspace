@@ -1,0 +1,241 @@
+---
+name: 'odoobo-expert'
+description: 'Enhanced Odoo/OCA specialist with Anthropic Skills architecture and DO Gradient AI integration'
+category: 'quality-assurance'
+version: '3.0.0'
+token_budget: 10000
+execution_policy:
+  timeout_seconds: 300
+  retry_attempts: 3
+  index_auto_refresh: true
+
+# Anthropic Skills Framework Integration
+skills_architecture:
+  framework: 'anthropic-skills'
+  local_path: '.claude/skills/'
+  skills:
+    - pr-review
+    - odoo-rpc
+    - nl-sql
+    - visual-diff
+    - design-tokens
+
+  # Context Engineering Best Practices (from Anthropic article)
+  context_strategy:
+    approach: 'minimal-high-signal'
+    structure: 'xml-sections'
+    memory_management: 'structured-notes'
+    tool_design: 'self-contained-robust'
+    reasoning: 'progressive-disclosure'
+
+# Enhanced Capabilities (Skills-based)
+capabilities:
+  pr_code_review:
+    skill: 'pr-review'
+    description: 'GitHub PR analysis with lockfile, security, OCA validation'
+    tools: ['analyze_pr_diff', 'detect_lockfile_sync']
+
+  odoo_integration:
+    skill: 'odoo-rpc'
+    description: 'Odoo ERP integration via XML-RPC and JSON-RPC'
+    tools: ['odoo_search', 'odoo_read', 'odoo_create', 'odoo_write']
+
+  nl_query:
+    skill: 'nl-sql'
+    description: 'Natural language to SQL with Odoo schema awareness'
+    tools: ['nl_to_sql', 'execute_query', 'validate_results']
+
+  visual_testing:
+    skill: 'visual-diff'
+    description: 'SSIM-based screenshot comparison for visual regression'
+    tools: ['capture_screenshot', 'compare_screenshots', 'calculate_ssim']
+
+  design_extraction:
+    skill: 'design-tokens'
+    description: 'Extract design tokens from CSS/SCSS to Tailwind'
+    tools: ['extract_css_vars', 'parse_scss', 'generate_tailwind_config']
+
+# DO Gradient AI Integration
+gradient_ai:
+  platform: 'digitalocean'
+  region: 'sgp' # Singapore
+  knowledge_base:
+    enabled: true
+    type: 'managed-opensearch'
+    embedding_model: 'text-embedding-ada-002'
+    sources:
+      - type: 'local'
+        path: '~/.claude/knowledge-bases/odoobo/'
+        formats: ['.md', '.txt', '.pdf']
+      - type: 'web'
+        urls:
+          - 'https://www.odoo.com/documentation/18.0/'
+          - 'https://github.com/OCA/maintainer-tools/wiki'
+    retrieval:
+      strategy: 'hybrid' # semantic + keyword
+      top_k: 5
+      min_score: 0.7
+
+# SuperClaude Framework Integration
+superclaude_integration:
+  personas:
+    primary: 'qa'
+    secondary: ['analyzer', 'security', 'backend']
+
+  mcp_servers:
+    primary: 'sequential-thinking'
+    secondary: ['context7', 'playwright']
+
+  orchestration:
+    enable_delegation: true
+    parallel_execution: true
+    max_concurrency: 3
+
+  modes:
+    - 'task-management'
+    - 'introspection'
+    - 'token-efficiency'
+
+# Git Worktrees for Parallel Development
+development:
+  worktrees:
+    enabled: true
+    base_path: '/tmp/odoobo-worktrees'
+    branches:
+      - 'skill/pr-review'
+      - 'skill/odoo-rpc'
+      - 'skill/nl-sql'
+      - 'skill/visual-diff'
+      - 'skill/design-tokens'
+
+  testing:
+    framework: 'pytest'
+    coverage_target: 0.80
+    parallel: true
+
+  ci_cd:
+    platform: 'github-actions'
+    matrix_strategy: true
+    parallel_jobs: 5
+
+# Integration Endpoints
+integration:
+  local_dev:
+    mode: 'direct'
+    base_url: 'http://localhost:8001'
+
+  staging:
+    mode: 'http'
+    endpoint: 'https://odoobo-staging.do-ai.run'
+    auth_method: 'bearer_token'
+
+  production:
+    mode: 'http'
+    endpoint: 'https://wr2azp5dsl6mu6xvxtpglk5v.agents.do-ai.run'
+    auth_method: 'bearer_token'
+    rate_limit: 1000 # requests per hour
+
+# Activation Triggers
+activation_triggers:
+  keywords:
+    - 'review'
+    - 'PR'
+    - 'pull request'
+    - 'code quality'
+    - 'odoo module'
+    - 'OCA'
+    - 'query database'
+    - 'visual test'
+    - 'design tokens'
+
+  file_patterns:
+    - '**/__manifest__.py'
+    - '**/__init__.py'
+    - '**/models/*.py'
+    - '**/views/*.xml'
+    - '**/security/*.csv'
+    - 'package.json'
+    - 'pnpm-lock.yaml'
+    - '**/*.css'
+    - '**/*.scss'
+
+  commands:
+    - '/review'
+    - '/analyze'
+    - '/scan --quality'
+    - '/query'
+    - '/visual-test'
+    - '/extract-tokens'
+
+# Output Format (Context Engineering Best Practices)
+output_format:
+  style: 'structured'
+  sections: 'xml-tags'
+  include_line_numbers: true
+  severity_levels: ['critical', 'high', 'medium', 'low']
+  auto_fix_suggestions: true
+  context_minimization: true # Anthropic best practice
+
+# Quality Gates
+quality_gates:
+  min_confidence: 0.80
+  max_false_positive_rate: 0.05
+  review_time_target_ms: 120000
+  ssim_threshold_mobile: 0.97
+  ssim_threshold_desktop: 0.98
+
+# Cost Optimization
+cost_optimization:
+  token_budget_enforcement: true
+  context_compaction: true
+  caching_strategy: 'aggressive'
+  parallel_reduction: 'efficient'
+
+# Examples (Context Engineering: Diverse, Canonical)
+examples:
+  - input: 'Review PR #123 for Odoo module changes'
+    skill: 'pr-review'
+    expected_tools: ['analyze_pr_diff', 'generate_review_comments']
+    expected_output: 'Structured review with line-level comments'
+
+  - input: 'Query all customers with unpaid invoices'
+    skill: 'nl-sql'
+    expected_tools: ['nl_to_sql', 'execute_query']
+    expected_output: 'SQL query and formatted results'
+
+  - input: 'Compare visual changes in expense form'
+    skill: 'visual-diff'
+    expected_tools: ['capture_screenshot', 'compare_screenshots']
+    expected_output: 'SSIM score with diff image'
+
+  - input: 'Extract design tokens from Odoo 18 webclient'
+    skill: 'design-tokens'
+    expected_tools: ['extract_css_vars', 'generate_tailwind_config']
+    expected_output: 'Tailwind config with all tokens'
+
+# Monitoring & Observability
+monitoring:
+  prometheus:
+    enabled: true
+    port: 9090
+    metrics:
+      - skill_execution_time
+      - skill_success_rate
+      - kb_retrieval_latency
+      - token_usage
+
+  grafana:
+    enabled: true
+    port: 3001
+    dashboards:
+      - odoobo-expert-overview
+      - skill-performance
+      - knowledge-base-stats
+
+# Security
+security:
+  secrets_management: 'environment-variables'
+  api_key_rotation: true
+  rate_limiting: true
+  input_validation: 'strict'
+  output_sanitization: true

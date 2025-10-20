@@ -1,0 +1,54 @@
+{
+  "severity_rules": {
+    "hardcoded_secrets": "critical",
+    "sql_injection": "critical",
+    "command_injection": "critical",
+    "path_traversal": "critical",
+    "xss_vulnerable": "high",
+    "insecure_crypto": "high",
+    "breaking_change": "high",
+    "missing_tests": "medium",
+    "performance_issue": "medium",
+    "code_smell": "low",
+    "style_violation": "low"
+  },
+  "file_type_modifiers": {
+    "auth": {
+      "multiplier": 1.5,
+      "description": "Authentication code requires higher scrutiny"
+    },
+    "payment": {
+      "multiplier": 2.0,
+      "description": "Payment processing is critical"
+    },
+    "api": {
+      "multiplier": 1.3,
+      "description": "Public APIs need careful review"
+    },
+    "test": {
+      "multiplier": 0.5,
+      "description": "Test code is lower risk"
+    }
+  },
+  "breaking_change_patterns": [
+    "removed.*?(function|method|class|interface|type)",
+    "changed.*?signature",
+    "renamed.*?(function|method|class|variable)",
+    "deprecated",
+    "BREAKING CHANGE:",
+    "!:"
+  ],
+  "approval_thresholds": {
+    "critical_count": 0,
+    "high_count": 2,
+    "medium_count": 5,
+    "complexity_score": 0.8
+  },
+  "auto_approve_criteria": {
+    "max_changes": 20,
+    "max_files": 3,
+    "no_security_issues": true,
+    "lockfile_synced": true,
+    "tests_passing": true
+  }
+}

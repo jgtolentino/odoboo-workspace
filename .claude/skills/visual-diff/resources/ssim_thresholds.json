@@ -1,0 +1,4 @@
+{
+  "mobile": { "width": 375, "height": 812, "threshold": 0.97 },
+  "desktop": { "width": 1920, "height": 1080, "threshold": 0.98 }
+}
