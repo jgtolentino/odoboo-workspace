@@ -212,9 +212,44 @@ sk-proj-1234567890abcdefghijklmnopqrstuvwxyz...
 
 ---
 
+### 6. MCP HTTP Gateway Authentication
+
+#### `MCP_ADMIN_TOKEN`
+
+**Purpose**: Admin token for write operations via MCP HTTP gateway (ChatGPT Actions)
+
+**Format**: Any secure random string (min 32 characters)
+
+**How to generate**:
+```bash
+# Option 1: OpenSSL (recommended)
+openssl rand -base64 32
+
+# Option 2: Node.js
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
+**Used by**:
+- `gateways/spec-inventory-http.js` - HTTP gateway for ChatGPT Actions
+- MCP connector write operations (create, update, delete specs)
+- Authentication for non-readonly operations
+
+**Security Notes**:
+- Read operations (list, get, search) do NOT require this token
+- Write operations (create, update, delete, move) REQUIRE this token via Bearer auth
+- Set monthly rate limits if exposing publicly
+- Rotate quarterly or if exposed
+
+**Example**:
+```
+k8sN3mP9qR7tY2wE5uI8oL1aS4dF6gH9jK0zX3cV5bN7mQ2
+```
+
+---
+
 ## 🎯 Optional Secrets
 
-### 6. Feature Flags & Overrides
+### 7. Feature Flags & Overrides
 
 #### `ROLLBACK_ALLOWED`
 
@@ -291,6 +326,7 @@ gh secret set PROD_DATABASE_URL -b "postgresql://postgres.prod:password@aws-0-re
 gh secret set NEXT_PUBLIC_SUPABASE_URL -b "https://your-project.supabase.co"
 gh secret set SUPABASE_SERVICE_ROLE_KEY -b "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 gh secret set INTERNAL_ADMIN_TOKEN -b "$(openssl rand -base64 32)"
+gh secret set MCP_ADMIN_TOKEN -b "$(openssl rand -base64 32)"
 gh secret set DO_ACCESS_TOKEN -b "dop_v1_your_token_here"
 gh secret set OPENAI_API_KEY -b "sk-proj-your_openai_api_key_here"
 
@@ -317,6 +353,7 @@ PROD_DATABASE_URL         Updated 2025-10-20
 NEXT_PUBLIC_SUPABASE_URL  Updated 2025-10-20
 SUPABASE_SERVICE_ROLE_KEY Updated 2025-10-20
 INTERNAL_ADMIN_TOKEN      Updated 2025-10-20
+MCP_ADMIN_TOKEN           Updated 2025-10-20
 DO_ACCESS_TOKEN           Updated 2025-10-20
 OPENAI_API_KEY            Updated 2025-10-20
 ```
@@ -375,6 +412,7 @@ curl -X POST http://localhost:3000/api/migrations \
 | Database URLs | When passwords change | High (requires DB password rotation) |
 | Supabase Keys | Quarterly or on breach | Medium (regenerate in Supabase dashboard) |
 | `INTERNAL_ADMIN_TOKEN` | Quarterly | Low (generate new random string) |
+| `MCP_ADMIN_TOKEN` | Quarterly | Low (generate new random string) |
 | `DO_ACCESS_TOKEN` | Yearly or on breach | Medium (generate new token in DO panel) |
 | `OPENAI_API_KEY` | Quarterly or on breach | Medium (generate new key in OpenAI dashboard) |
 
