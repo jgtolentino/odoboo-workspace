@@ -73,6 +73,7 @@ docker-compose.override.yml
 *.temp
 /tmp/
 .cache/
+.out/
 
 # Node.js (if using any JS tools)
 node_modules/

@@ -1,0 +1,42 @@
+id: FEAT-015
+title: Real-time Collaboration Engine
+priority: P1
+owner: product@insightpulseai.net
+status: todo
+created: 2025-10-18
+updated: 2025-10-18
+
+description: |
+  Enable real-time collaborative editing similar to Notion/Google Docs.
+  Users can see live cursors, edits, and presence indicators.
+
+tags:
+  - collaboration
+  - realtime
+  - websockets
+  - supabase
+
+epic: Core Platform Features
+
+acceptance_criteria:
+  - Live cursor tracking
+  - Real-time text editing with CRDT
+  - Presence indicators (who's online)
+  - Comment threads
+  - '@mentions with notifications'
+  - Conflict resolution
+  - Offline support with sync
+
+related:
+  - FEAT-016
+  - FEAT-020
+
+dependencies:
+  - FEAT-002 (need RBAC for permissions)
+
+technical_notes: |
+  Using Supabase Realtime for presence and broadcast.
+  Considering Yjs for CRDT text editing.
+  WebSocket fallback to long-polling for corporate firewalls.
+
+estimated_effort: 3 weeks

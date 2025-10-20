@@ -1,0 +1,44 @@
+id: FEAT-100
+title: Mobile App Offline Sync
+priority: P1
+owner: mobile@insightpulseai.net
+status: paused
+created: 2025-10-10
+updated: 2025-10-17
+
+description: |
+  Enable full offline support for Flutter mobile app with intelligent sync
+  when connection is restored. Uses local SQLite + Supabase sync.
+
+tags:
+  - mobile
+  - flutter
+  - offline
+  - sync
+
+epic: Mobile Experience
+
+acceptance_criteria:
+  - Local SQLite database for offline storage
+  - Automatic sync on network restore
+  - Conflict resolution UI
+  - Optimistic updates
+  - Background sync
+  - Sync status indicator
+
+related:
+  - FEAT-015
+
+blockers:
+  - Flutter Supabase client sync issues
+  - Conflict resolution UX design not finalized
+
+paused_reason: |
+  Paused pending resolution of Supabase Flutter client sync bugs.
+  Tracking upstream issue: https://github.com/supabase/supabase-flutter/issues/XXX
+
+notes: |
+  Desktop offline support working. Mobile implementation blocked.
+  May switch to custom sync solution if upstream issue persists.
+
+estimated_effort: 4 weeks

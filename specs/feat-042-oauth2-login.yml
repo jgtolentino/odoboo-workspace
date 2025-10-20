@@ -1,0 +1,35 @@
+id: FEAT-042
+title: Extended OAuth2 Providers
+priority: P2
+owner: integrations@insightpulseai.net
+status: todo
+created: 2025-10-19
+updated: 2025-10-19
+
+description: |
+  Add additional OAuth2 login providers beyond Google and GitHub.
+  Target: Microsoft, Apple, LinkedIn, Slack.
+
+tags:
+  - authentication
+  - oauth2
+  - integrations
+
+epic: Security & Access Control
+
+acceptance_criteria:
+  - Microsoft OAuth2 (Azure AD)
+  - Apple Sign In
+  - LinkedIn OAuth2
+  - Slack OAuth2
+  - Unified user profile mapping
+  - Account linking for multiple providers
+
+related:
+  - FEAT-001
+
+notes: |
+  Low priority. Awaiting user demand analysis.
+  Microsoft integration most requested (enterprise users).
+
+estimated_effort: 1 week

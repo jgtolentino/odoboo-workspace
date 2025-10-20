@@ -342,5 +342,54 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 
 ---
 
+## MCP Data Connectors (✅ Implemented)
+
+### Native MCP Servers (Claude/Cursor)
+- ✅ `mcp-spec-inventory` - TypeScript MCP server for spec YAML file management
+  - Full CRUD operations (create, read, update, delete, move)
+  - Filtering by status, priority, owner
+  - Search across all spec fields
+  - Automatic validation and reference checking
+
+- ✅ `mcp-odoo` - Python MCP server for Odoo XML-RPC
+  - search_read for any Odoo model
+  - call_kw for custom methods
+  - get_model_fields for schema introspection
+
+- ✅ `supabase` - External MCP integration
+  - Database operations (docs, database, account)
+  - Edge Functions management
+  - Storage and branching
+
+### HTTP Gateway (ChatGPT Actions)
+- ✅ `spec-inventory-http` - Express gateway exposing MCP tools as REST API
+  - OpenAPI 3.1 specification
+  - Bearer token authentication for writes
+  - CORS enabled for GPT Actions
+  - Health monitoring endpoint
+
+### CI/CD Integration
+- ✅ Spec validation workflow (`.github/workflows/spec-inventory.yml`)
+  - Validates YAML format and required fields
+  - Checks FEATURES.md references
+  - Posts PR comments with spec summary
+  - Generates spec-index.json artifact
+
+- ✅ Health check workflow (`.github/workflows/connectors-health.yml`)
+  - Runs every 30 minutes
+  - Tests gateway endpoints
+  - Monitors OpenAPI spec accessibility
+
+### Example Specs Created
+- ✅ FEAT-001: User Authentication System (P0, done)
+- ✅ FEAT-002: Role-Based Access Control (P0, doing)
+- ✅ FEAT-015: Real-time Collaboration Engine (P1, todo)
+- ✅ FEAT-042: Extended OAuth2 Providers (P2, todo)
+- ✅ FEAT-100: Mobile App Offline Sync (P1, paused)
+
+For detailed MCP deployment instructions, see [`docs/MCP_DEPLOYMENT_GUIDE.md`](./docs/MCP_DEPLOYMENT_GUIDE.md).
+
+---
+
 **Last Updated**: 2025-10-20
 **Next Review**: 2025-11-01
