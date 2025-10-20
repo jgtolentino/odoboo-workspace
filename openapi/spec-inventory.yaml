@@ -1,0 +1,285 @@
+openapi: 3.1.0
+info:
+  title: Spec Inventory API
+  description: API for managing feature specifications in odoboo-workspace
+  version: 1.0.0
+servers:
+  - url: https://insightpulseai.net/agent/spec
+    description: Production server
+
+paths:
+  /list_features:
+    post:
+      operationId: listFeatures
+      summary: List all feature specs
+      description: Returns all specs with optional filtering by status, priority, or owner
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [todo, doing, done, paused]
+                  description: Filter by status
+                priority:
+                  type: string
+                  enum: [P0, P1, P2]
+                  description: Filter by priority
+                owner:
+                  type: string
+                  description: Filter by owner
+      responses:
+        '200':
+          description: List of specs with summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  byStatus:
+                    type: object
+                    properties:
+                      todo: { type: integer }
+                      doing: { type: integer }
+                      done: { type: integer }
+                      paused: { type: integer }
+                  byPriority:
+                    type: object
+                    properties:
+                      P0: { type: integer }
+                      P1: { type: integer }
+                      P2: { type: integer }
+                  specs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Spec'
+
+  /get_spec:
+    post:
+      operationId: getSpec
+      summary: Get a specific spec by ID
+      description: Returns full details of a single spec
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Spec ID (e.g., FEAT-001)
+              required: [id]
+      responses:
+        '200':
+          description: Spec details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Spec'
+        '404':
+          description: Spec not found
+
+  /search_specs:
+    post:
+      operationId: searchSpecs
+      summary: Search specs by keyword
+      description: Search in title, description, and tags
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                  description: Search query
+              required: [query]
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  query: { type: string }
+                  matches: { type: integer }
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Spec'
+
+  /create_spec:
+    post:
+      operationId: createSpec
+      summary: Create a new spec
+      description: Creates a new spec file (requires authentication)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Unique spec ID
+                title:
+                  type: string
+                  description: Spec title
+                priority:
+                  type: string
+                  enum: [P0, P1, P2]
+                  description: Priority level
+                owner:
+                  type: string
+                  description: Owner email or username
+                status:
+                  type: string
+                  enum: [todo, doing, done, paused]
+                  description: Current status
+                description:
+                  type: string
+                  description: Detailed description
+                tags:
+                  type: array
+                  items: { type: string }
+                  description: Tags
+              required: [id, title, priority, owner, status]
+      responses:
+        '200':
+          description: Spec created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  id: { type: string }
+                  file: { type: string }
+                  spec: { $ref: '#/components/schemas/Spec' }
+        '401':
+          description: Unauthorized
+        '409':
+          description: Spec already exists
+
+  /update_spec:
+    post:
+      operationId: updateSpec
+      summary: Update an existing spec
+      description: Updates any field of an existing spec (requires authentication)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Spec ID to update
+                title: { type: string }
+                priority:
+                  type: string
+                  enum: [P0, P1, P2]
+                owner: { type: string }
+                status:
+                  type: string
+                  enum: [todo, doing, done, paused]
+                description: { type: string }
+                tags:
+                  type: array
+                  items: { type: string }
+              required: [id]
+      responses:
+        '200':
+          description: Spec updated
+        '401':
+          description: Unauthorized
+        '404':
+          description: Spec not found
+
+  /mark_done:
+    post:
+      operationId: markDone
+      summary: Mark a spec as done
+      description: Updates spec status to 'done' (requires authentication)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Spec ID
+                commit:
+                  type: string
+                  description: Git commit SHA that completes this spec
+                notes:
+                  type: string
+                  description: Completion notes
+              required: [id]
+      responses:
+        '200':
+          description: Spec marked as done
+        '401':
+          description: Unauthorized
+        '404':
+          description: Spec not found
+
+components:
+  schemas:
+    Spec:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier
+        title:
+          type: string
+          description: Spec title
+        priority:
+          type: string
+          enum: [P0, P1, P2]
+          description: Priority level
+        owner:
+          type: string
+          description: Owner email or username
+        status:
+          type: string
+          enum: [todo, doing, done, paused]
+          description: Current status
+        description:
+          type: string
+          description: Detailed description
+        tags:
+          type: array
+          items: { type: string }
+          description: Tags for categorization
+        file:
+          type: string
+          description: Relative file path
+        lastModified:
+          type: string
+          format: date-time
+          description: Last modification timestamp
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: Admin token for write operations (MCP_ADMIN_TOKEN)

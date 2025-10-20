@@ -1,0 +1,85 @@
+name: MCP Connectors Health Check
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'  # Every 30 minutes
+  workflow_dispatch:  # Manual trigger
+  push:
+    branches: [main]
+    paths:
+      - 'servers/**'
+      - 'gateways/**'
+      - '.github/workflows/connectors-health.yml'
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    name: Check MCP Connector Health
+
+    steps:
+      - name: Check Spec Inventory Gateway
+        run: |
+          echo "Testing spec inventory gateway..."
+          RESPONSE=$(curl -fsSL https://insightpulseai.net/agent/spec/health || echo "FAILED")
+
+          if [[ "$RESPONSE" == *"\"status\":\"ok\""* ]]; then
+            echo "✅ Spec inventory gateway: healthy"
+          else
+            echo "❌ Spec inventory gateway: unhealthy"
+            echo "Response: $RESPONSE"
+            exit 1
+          fi
+
+      - name: Check List Features Endpoint
+        run: |
+          echo "Testing list_features endpoint..."
+          RESPONSE=$(curl -fsSL https://insightpulseai.net/agent/spec/list_features \
+            -X POST \
+            -H 'Content-Type: application/json' \
+            -d '{}' || echo "FAILED")
+
+          if [[ "$RESPONSE" == *"\"total\":"* ]]; then
+            echo "✅ List features endpoint: working"
+            echo "Response: $RESPONSE" | jq -r '"\(.total) total specs"'
+          else
+            echo "❌ List features endpoint: failed"
+            echo "Response: $RESPONSE"
+            exit 1
+          fi
+
+      - name: Check OpenAPI Spec
+        run: |
+          echo "Testing OpenAPI spec..."
+          HTTP_CODE=$(curl -fsSL -w "%{http_code}" -o /dev/null \
+            https://insightpulseai.net/agent/spec/openapi.yaml || echo "000")
+
+          if [[ "$HTTP_CODE" == "200" ]]; then
+            echo "✅ OpenAPI spec: accessible"
+          else
+            echo "❌ OpenAPI spec: not accessible (HTTP $HTTP_CODE)"
+            exit 1
+          fi
+
+      - name: Post Health Report to Slack/Discord (on failure)
+        if: failure()
+        run: |
+          echo "⚠️  MCP Connectors health check failed!"
+          echo "Timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          echo ""
+          echo "Action required:"
+          echo "1. Check https://insightpulseai.net/agent/spec/health"
+          echo "2. SSH to droplet: ssh root@188.166.237.231"
+          echo "3. Check logs: docker compose logs spec-gateway mcp-odoo"
+          echo "4. Restart if needed: docker compose restart spec-gateway"
+
+      - name: Summary
+        if: success()
+        run: |
+          echo "✅ All MCP connectors healthy!"
+          echo ""
+          echo "Services:"
+          echo "  - Spec Inventory Gateway: ✅"
+          echo "  - List Features API: ✅"
+          echo "  - OpenAPI Spec: ✅"
+          echo ""
+          echo "Next check: $(date -u -d '+30 minutes' +"%Y-%m-%dT%H:%M:%SZ")"
