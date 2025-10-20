@@ -1,5 +1,15 @@
+# Specs and documentation
 /docs/ @jgtolentino
-/app/** @web-senior
-/supabase/migrations/** @backend-senior
-/supabase/functions/** @backend-senior
-/packages/mobile/** @mobile-senior
+/spec/ @jgtolentino
+
+# CI/CD workflows
+/.github/workflows/ @jgtolentino
+
+# Database migrations
+/packages/db/sql/ @jgtolentino
+/supabase/migrations/ @backend-senior
+
+# Application code
+/app/ @web-senior
+/supabase/functions/ @backend-senior
+/packages/mobile/ @mobile-senior

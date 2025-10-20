@@ -1,0 +1,14 @@
+[
+  {
+    "path": "spec/00-product-vision.md",
+    "sha": "ca22962c30356095dc2824684c6d70d0a5e54772"
+  },
+  {
+    "path": "spec/01-ocr-expense-processing.md",
+    "sha": "51d86d23288fd05e0b16a595ad7f67395c9c37be"
+  },
+  {
+    "path": "spec/03-knowledge-base-integration.md",
+    "sha": "9c7abacc6c6e0d3a41b935177fe40beba83c9f3e"
+  }
+]
