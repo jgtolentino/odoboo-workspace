@@ -120,3 +120,15 @@ $RECYCLE.BIN/
 # Odoo Specific
 /addons/*/static/description/icon.png
 /addons/*/i18n/*.pot
+
+# Deployment Reports with Embedded Credentials (DO NOT COMMIT)
+DEPLOYMENT_STATUS_20251020.md
+CUSTOM_DRAXLR_GUIDE.md
+DEMO_SETUP_COMPLETE.md
+verify-production.sh
+
+# Claude Local Settings
+.claude/settings.local*.json
+
+# Demo and Testing
+demo/

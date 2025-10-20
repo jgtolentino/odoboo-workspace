@@ -1,0 +1,30 @@
+{
+  "agent_name": "odoobo-reviewer",
+  "remote_endpoint": "https://wr2azp5dsl6mu6xvxtpglk5v.agents.do-ai.run",
+  "local_port": 8003,
+  "timeout_seconds": 180,
+  "cache_enabled": true,
+  "cache_ttl_seconds": 3600,
+
+  "capabilities": [
+    "pr_code_review",
+    "odoo_module_analysis",
+    "oca_pattern_detection",
+    "security_scan",
+    "performance_suggestions",
+    "visual_parity_validation"
+  ],
+
+  "quality_gates": {
+    "min_confidence": 0.8,
+    "max_false_positive_rate": 0.05,
+    "review_time_target_ms": 120000
+  },
+
+  "integration": {
+    "superc": true,
+    "framework_integration": true,
+    "auto_activate_on_pr": true,
+    "parallel_execution": true
+  }
+}
