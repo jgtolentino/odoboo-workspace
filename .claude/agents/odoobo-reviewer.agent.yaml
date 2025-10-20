@@ -1,0 +1,83 @@
+---
+name: 'odoobo-reviewer'
+description: 'Odoo/OCA code review specialist with PR analysis and automated suggestions'
+category: 'quality-assurance'
+token_budget: 8000
+execution_policy:
+  timeout_seconds: 180
+  retry_attempts: 2
+  index_auto_refresh: false
+
+capabilities:
+  - pr_code_review
+  - odoo_module_analysis
+  - oca_pattern_detection
+  - security_vulnerability_scan
+  - performance_optimization_suggestions
+  - visual_parity_validation
+
+integration:
+  endpoint: 'https://wr2azp5dsl6mu6xvxtpglk5v.agents.do-ai.run'
+  fallback_local: 'http://localhost:8003/review'
+  auth_method: 'bearer_token'
+
+tools:
+  - analyze_pr_diff
+  - generate_review_comments
+  - detect_lockfile_sync
+  - visual_diff
+  - nl_to_sql
+  - execute_query
+
+activation_triggers:
+  keywords:
+    - 'review'
+    - 'PR'
+    - 'pull request'
+    - 'code quality'
+    - 'odoo module'
+    - 'OCA'
+  file_patterns:
+    - '**/__manifest__.py'
+    - '**/__init__.py'
+    - '**/models/*.py'
+    - '**/views/*.xml'
+    - '**/security/*.csv'
+    - 'package.json'
+    - 'pnpm-lock.yaml'
+  commands:
+    - '/review'
+    - '/analyze'
+    - '/scan --quality'
+
+output_format:
+  style: 'structured'
+  include_line_numbers: true
+  severity_levels: ['critical', 'high', 'medium', 'low']
+  auto_fix_suggestions: true
+
+quality_gates:
+  min_confidence: 0.80
+  max_false_positive_rate: 0.05
+  review_time_target_ms: 120000
+
+personas_integration:
+  primary: 'qa'
+  secondary: ['analyzer', 'security']
+
+mcp_preferences:
+  primary: 'sequential-thinking'
+  secondary: 'context7'
+
+examples:
+  - input: 'Review PR #123 for Odoo module changes'
+    expected_tools: ['analyze_pr_diff', 'generate_review_comments']
+    expected_output: 'Structured review with line-level comments and overall score'
+
+  - input: 'Check if package.json changes have matching lockfile updates'
+    expected_tools: ['detect_lockfile_sync']
+    expected_output: 'Sync status with fix command if out of sync'
+
+  - input: 'Analyze security vulnerabilities in this Odoo module'
+    expected_tools: ['analyze_pr_diff']
+    expected_output: 'Security issues with severity levels and remediation steps'

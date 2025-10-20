@@ -1,0 +1,32 @@
+name: OCR Service Uptime Monitor
+
+on:
+  schedule:
+    # Every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Main Health
+        run: |
+          curl -fsS https://insightpulseai.net/health > /dev/null
+          echo "✅ Main health endpoint OK"
+
+      - name: Check OCR Service
+        run: |
+          curl -fsS https://insightpulseai.net/ocr/health > /dev/null
+          echo "✅ OCR service healthy"
+
+      - name: Check Agent Service
+        run: |
+          curl -fsS https://insightpulseai.net/agent/health > /dev/null
+          echo "✅ Agent service healthy"
+
+      - name: Notify on Failure
+        if: failure()
+        run: |
+          echo "❌ Health check failed - OCR services may be down"
+          echo "Check https://insightpulseai.net/health for status"
