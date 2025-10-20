@@ -1,0 +1,11 @@
+name,start,stop,allday,location,description,partner_ids/email,alarm_ids/name,categ_ids/name
+BIR Tax Filing Deadline - Form 2550M,2026-02-10 09:00:00,2026-02-10 17:00:00,TRUE,BIR RDO,Monthly withholding tax return deadline,"tax@company.com,accountant@company.com",1 day before,Tax Deadlines
+Month-End Closing Review,2026-01-31 14:00:00,2026-01-31 16:00:00,FALSE,Conference Room A,Monthly financial closing review meeting,"cfo@company.com,accountant@company.com,finance.director@company.com",1 hour before,Finance Meetings
+Vendor Rate Approval Meeting,2026-02-15 10:00:00,2026-02-15 11:00:00,FALSE,Zoom,Review and approve vendor rates for Q1 campaigns,"am@company.com,finance.director@company.com",30 minutes before,Procurement
+Bank Reconciliation Deadline,2026-01-25 17:00:00,2026-01-25 17:00:00,TRUE,,Internal deadline for completing all bank reconciliations,accountant@company.com,1 day before,Internal Deadlines
+SEC Financial Statements Submission,2026-04-15 09:00:00,2026-04-15 17:00:00,TRUE,SEC Main Office,Annual financial statements submission deadline (for 2025 fiscal year),"cfo@company.com,compliance@company.com",1 week before,Regulatory Deadlines
+Quarterly Tax Return - Form 1701Q,2026-05-15 09:00:00,2026-05-15 17:00:00,TRUE,BIR RDO,Quarterly income tax return filing deadline (Q1 2026),"tax@company.com,cfo@company.com",3 days before,Tax Deadlines
+SSS Monthly Contributions,2026-02-10 17:00:00,2026-02-10 17:00:00,TRUE,SSS Online,Monthly SSS contributions deadline for January 2026,hr@company.com,2 days before,Statutory Deadlines
+PhilHealth Monthly Contributions,2026-02-10 17:00:00,2026-02-10 17:00:00,TRUE,PhilHealth Portal,Monthly PhilHealth contributions deadline for January 2026,hr@company.com,2 days before,Statutory Deadlines
+Pag-IBIG Monthly Contributions,2026-02-10 17:00:00,2026-02-10 17:00:00,TRUE,Pag-IBIG Portal,Monthly Pag-IBIG contributions deadline for January 2026,hr@company.com,2 days before,Statutory Deadlines
+Board Meeting - Financial Review,2026-03-15 09:00:00,2026-03-15 12:00:00,FALSE,Board Room,Quarterly board meeting for financial and operational review,"ceo@company.com,cfo@company.com,board@company.com",1 day before,Board Meetings
