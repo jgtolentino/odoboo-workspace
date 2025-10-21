@@ -18,9 +18,10 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.DROPLET_SSH_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.DROPLET_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H 128.199.124.77 >> ~/.ssh/known_hosts
+          ssh-keyscan -H 188.166.237.231 >> ~/.ssh/known_hosts
 
       - name: Copy script to droplet
         run: |
