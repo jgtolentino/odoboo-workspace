@@ -1,0 +1,76 @@
+name: superclaude
+role: orchestrator
+description: Master orchestrator for all CI/CD/deploy workflows
+
+routing:
+  - when: event == "pr_opened" || event == "pr_sync"
+    parallel:
+      - reviewer
+      - security-scan
+      - test-runner
+    then: aggregate_pr_results
+
+  - when: event == "deploy_staging"
+    sequence:
+      - devops
+      - parallel:
+          - test-runner
+          - security-scan
+          - analyst
+      - odoo_update
+
+  - when: event == "deploy_prod"
+    sequence:
+      - devops
+      - parallel:
+          - test-runner
+          - security-scan
+      - odoo_update
+
+  - when: event == "nightly"
+    parallel:
+      - devops  # backup + SSL renew
+      - analyst # metrics report
+      - reviewer # spec drift check
+
+integrations:
+  odoo:
+    url: ${ODOO_URL}
+    database: ${ODOO_DATABASE}
+    api_key: ${ODOO_API_KEY}
+    kanban_project: "CI/CD Pipeline"
+    discuss_channel: "#ci-updates"
+
+  github:
+    token: ${GITHUB_TOKEN}
+    repository: ${GITHUB_REPOSITORY}
+
+  digitalocean:
+    token: ${DO_ACCESS_TOKEN}
+    droplet: insightpulseai.net
+
+guardrails:
+  max_tokens: 16000
+  timeout: 900  # 15 minutes
+  require_structured_output: true
+  parallel_limit: 5  # max concurrent sub-agents
+
+  secrets:
+    - DO_ACCESS_TOKEN
+    - GITHUB_TOKEN
+    - DATABASE_URL
+    - SUPABASE_SERVICE_ROLE_KEY
+    - ODOO_API_KEY
+    - OPENAI_API_KEY
+    - MCP_ADMIN_TOKEN
+
+defaults:
+  mcp_servers: "../mcp/servers.json"
+  output_format: json
+  log_level: info
+
+error_handling:
+  retry_count: 2
+  retry_delay: 5  # seconds
+  on_failure: rollback_and_notify
+  notification_channel: "#ci-updates"

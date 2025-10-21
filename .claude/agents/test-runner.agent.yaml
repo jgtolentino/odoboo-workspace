@@ -1,0 +1,94 @@
+name: test-runner
+role: test_executor
+description: Unit/integration/e2e/smoke tests with coverage
+
+capabilities:
+  - unit_tests
+  - integration_tests
+  - e2e_smoke
+  - coverage_report
+  - performance_baseline
+
+tools:
+  - pytest
+  - jest
+  - playwright
+  - mcp/odoo-rpc
+  - lighthouse
+
+tests:
+  unit:
+    command: pytest -v --tb=short --cov=. --cov-report=json
+    threshold: 80
+    timeout: 300
+
+  integration:
+    command: docker-compose -f docker-compose.test.yml up --abort-on-container-exit
+    timeout: 600
+
+  e2e:
+    command: playwright test
+    browsers: [chromium, firefox]
+    timeout: 900
+
+  smoke:
+    endpoints:
+      - url: ${STAGING_URL}/health
+        method: GET
+        expected_status: 200
+
+      - url: ${STAGING_URL}/api/health
+        method: GET
+        expected_status: 200
+
+      - url: ${STAGING_URL}/odoo/web/health
+        method: GET
+        expected_status: 200
+
+      - url: ${STAGING_URL}/ocr/health
+        method: GET
+        expected_status: 200
+
+  performance:
+    lighthouse:
+      - url: ${STAGING_URL}
+        threshold:
+          performance: 90
+          accessibility: 95
+          best-practices: 90
+          seo: 90
+
+output_contract:
+  status:
+    type: enum
+    values: ["pass", "fail", "partial"]
+
+  total: integer
+  passed: integer
+  failed: integer
+  skipped: integer
+
+  coverage:
+    type: object
+    properties:
+      percentage: float
+      lines_covered: integer
+      lines_total: integer
+      branches_covered: integer
+      branches_total: integer
+
+  failed_tests:
+    type: array
+    items:
+      test_name: string
+      file: string
+      error: string
+      duration: float
+
+  performance:
+    type: object
+    properties:
+      lighthouse_score: integer
+      lcp: float  # Largest Contentful Paint
+      fid: float  # First Input Delay
+      cls: float  # Cumulative Layout Shift

@@ -1,0 +1,95 @@
+name: devops
+role: deployment_operator
+description: Backup + deploy + SSL + uptime + monitoring
+
+capabilities:
+  - backup_database
+  - deploy_containers
+  - ssl_renewal
+  - uptime_monitoring
+  - log_aggregation
+
+tools:
+  - mcp/docker
+  - mcp/psql
+  - doctl
+  - certbot
+  - mcp/supabase
+  - ssh
+
+tasks:
+  backup:
+    pre_deploy: true
+    command: |
+      pg_dump ${DATABASE_URL} \
+        --format=custom \
+        --file=/tmp/backup_$(date +%Y%m%d_%H%M%S).dump
+    upload_to: digitalocean_spaces
+    retention_days: 30
+
+  deploy:
+    strategy: blue_green
+    steps:
+      - git pull origin ${BRANCH}
+      - docker-compose pull
+      - docker-compose up -d --no-deps --build
+      - wait_for_health_checks
+      - prune_old_images
+
+    rollback_on_failure: true
+    health_check_timeout: 120
+
+  ssl_renew:
+    check_interval: daily
+    command: certbot renew --dry-run
+    notify_threshold: 30  # days before expiry
+
+  uptime:
+    endpoints:
+      - https://insightpulseai.net/health
+      - https://insightpulseai.net/ocr/health
+      - https://insightpulseai.net/agent/health
+
+    interval: 300  # 5 minutes
+    retries: 2
+    timeout: 10
+
+output_contract:
+  status:
+    type: enum
+    values: ["success", "failed", "partial"]
+
+  deployed_services:
+    type: array
+    items: string
+
+  backup:
+    type: object
+    properties:
+      file: string
+      size_mb: float
+      upload_url: string
+      timestamp: string
+
+  health_checks:
+    type: object
+    description: Service name → boolean (healthy)
+    additionalProperties:
+      type: boolean
+
+  ssl_status:
+    type: object
+    properties:
+      renewed: boolean
+      expiry_date: string
+      days_remaining: integer
+
+  rollback_performed:
+    type: boolean
+
+  errors:
+    type: array
+    items:
+      service: string
+      error: string
+      timestamp: string

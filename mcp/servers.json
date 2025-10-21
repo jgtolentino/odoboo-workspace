@@ -1,0 +1,59 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "gh",
+      "args": ["api"],
+      "description": "GitHub API access via gh CLI"
+    },
+    "git": {
+      "command": "git",
+      "args": [],
+      "description": "Git operations"
+    },
+    "docker": {
+      "command": "docker",
+      "args": [],
+      "description": "Docker container operations"
+    },
+    "psql": {
+      "command": "psql",
+      "args": ["-Atc"],
+      "description": "PostgreSQL queries"
+    },
+    "supabase": {
+      "command": "supabase",
+      "args": [],
+      "description": "Supabase CLI operations"
+    },
+    "odoo-rpc": {
+      "command": "python3",
+      "args": ["/home/user/odoboo-workspace/servers/mcp-odoo/main.py"],
+      "env": {
+        "ODOO_URL": "${ODOO_URL}",
+        "ODOO_DB": "${ODOO_DATABASE}",
+        "ODOO_USER": "${ODOO_USER}",
+        "ODOO_PWD": "${ODOO_API_KEY}"
+      },
+      "description": "Odoo XML-RPC operations"
+    },
+    "spec-inventory": {
+      "command": "node",
+      "args": ["/home/user/odoboo-workspace/servers/mcp-spec-inventory/dist/index.js"],
+      "env": {
+        "WORKSPACE_ROOT": "/home/user/odoboo-workspace",
+        "SPECS_DIR": "specs"
+      },
+      "description": "Spec/feature inventory management"
+    },
+    "visual-diff": {
+      "command": "node",
+      "args": ["/home/user/odoboo-workspace/scripts/visual_diff.js"],
+      "description": "Visual regression testing"
+    },
+    "design-tokens": {
+      "command": "node",
+      "args": ["/home/user/odoboo-workspace/scripts/extract_tokens.js"],
+      "description": "Design token extraction from UI"
+    }
+  }
+}
