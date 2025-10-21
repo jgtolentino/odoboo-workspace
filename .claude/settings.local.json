@@ -79,7 +79,12 @@
       "Bash(doctl compute droplet list --format ID,Name,PublicIPv4,Status)",
       "Bash(GITHUB_TOKEN=\"\" gh workflow run install-magic-link.yml --repo jgtolentino/odoboo-workspace)",
       "Bash(GITHUB_TOKEN=\"\" gh run list --workflow=install-magic-link.yml --repo jgtolentino/odoboo-workspace --limit 1)",
-      "Bash(GITHUB_TOKEN=\"\" gh run watch 18670850272 --repo jgtolentino/odoboo-workspace --exit-status)"
+      "Bash(GITHUB_TOKEN=\"\" gh run watch 18670850272 --repo jgtolentino/odoboo-workspace --exit-status)",
+      "Bash(GITHUB_TOKEN=\"\" gh workflow run install-okta-saml.yml --repo jgtolentino/odoboo-workspace)",
+      "Bash(GITHUB_TOKEN=\"\" gh run list --workflow=install-okta-saml.yml --repo jgtolentino/odoboo-workspace --limit 1)",
+      "Bash(GITHUB_TOKEN=\"\" gh run watch 18671158169 --repo jgtolentino/odoboo-workspace --exit-status)",
+      "Bash(curl:*)",
+      "Bash(chmod +x \"/Users/tbwa/Library/Mobile Documents/com~apple~CloudDocs/Documents/TBWA/odoboo-workspace/scripts/deploy_production_setb.sh\")"
     ],
     "deny": [],
     "ask": []

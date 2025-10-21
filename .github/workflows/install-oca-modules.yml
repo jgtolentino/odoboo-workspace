@@ -1,0 +1,161 @@
+name: Install OCA Modules
+
+on:
+  workflow_dispatch:
+    inputs:
+      modules:
+        description: 'Comma-separated OCA module names (e.g., web_responsive,server_mode)'
+        required: true
+      database:
+        description: 'Database name'
+        required: false
+        default: 'insightpulse_prod'
+      oca_version:
+        description: 'OCA version branch (18.0, 17.0, 16.0)'
+        required: false
+        default: '18.0'
+
+jobs:
+  install-oca:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DROPLET_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 188.166.237.231 >> ~/.ssh/known_hosts
+
+      - name: Clone OCA repositories
+        run: |
+          # Parse module list
+          IFS=',' read -ra MODULES <<< "${{ github.event.inputs.modules }}"
+
+          # Create temp directory
+          mkdir -p /tmp/oca_modules
+
+          # Common OCA repositories for Odoo 18
+          declare -A OCA_REPOS=(
+            ["web_responsive"]="https://github.com/OCA/web.git"
+            ["server_mode"]="https://github.com/OCA/server-tools.git"
+            ["base_technical_features"]="https://github.com/OCA/server-tools.git"
+            ["server_environment"]="https://github.com/OCA/server-env.git"
+            ["web_environment_ribbon"]="https://github.com/OCA/web.git"
+            ["web_theme_classic"]="https://github.com/OCA/web.git"
+            ["date_range"]="https://github.com/OCA/server-tools.git"
+            ["excel_import_export"]="https://github.com/OCA/server-tools.git"
+          )
+
+          # Clone each repository and extract modules
+          for module in "${MODULES[@]}"; do
+            module=$(echo "$module" | xargs) # trim whitespace
+
+            if [[ -v "OCA_REPOS[$module]" ]]; then
+              repo="${OCA_REPOS[$module]}"
+              repo_name=$(basename "$repo" .git)
+
+              echo "Cloning $repo_name for module $module..."
+
+              if [ ! -d "/tmp/oca_modules/$repo_name" ]; then
+                git clone --depth 1 --branch ${{ github.event.inputs.oca_version }} "$repo" "/tmp/oca_modules/$repo_name" || \
+                git clone --depth 1 --branch 17.0 "$repo" "/tmp/oca_modules/$repo_name" || \
+                echo "Warning: Could not clone $repo_name, module may not be available for Odoo ${{ github.event.inputs.oca_version }}"
+              fi
+
+              if [ -d "/tmp/oca_modules/$repo_name/$module" ]; then
+                echo "Found module: $module"
+              else
+                echo "Warning: Module $module not found in $repo_name"
+              fi
+            else
+              echo "Warning: Unknown module $module - please add repository mapping"
+            fi
+          done
+
+      - name: Copy OCA modules to droplet
+        run: |
+          # Parse module list
+          IFS=',' read -ra MODULES <<< "${{ github.event.inputs.modules }}"
+
+          # Create addons directory on droplet
+          ssh root@188.166.237.231 "mkdir -p /opt/odoo/addons/oca"
+
+          # Copy each module
+          for module in "${MODULES[@]}"; do
+            module=$(echo "$module" | xargs)
+
+            # Find the module in cloned repositories
+            module_path=$(find /tmp/oca_modules -type d -name "$module" | head -1)
+
+            if [ -n "$module_path" ]; then
+              echo "Copying $module to droplet..."
+              scp -r "$module_path" root@188.166.237.231:/opt/odoo/addons/oca/
+            else
+              echo "Warning: Module $module not found locally"
+            fi
+          done
+
+      - name: Update Odoo addons path
+        run: |
+          ssh root@188.166.237.231 << 'REMOTE'
+          # Check if OCA path already in config
+          if ! docker exec odoo18 cat /etc/odoo/odoo.conf | grep -q "/opt/odoo/addons/oca"; then
+            echo "Adding OCA path to Odoo config..."
+            docker exec odoo18 bash -c "echo 'addons_path = /mnt/extra-addons,/opt/odoo/addons/oca,/var/lib/odoo/addons/18.0,/usr/lib/python3/dist-packages/odoo/addons' >> /etc/odoo/odoo.conf"
+          fi
+          REMOTE
+
+      - name: Install OCA modules
+        run: |
+          # Convert comma-separated list to Odoo format
+          MODULES_LIST=$(echo "${{ github.event.inputs.modules }}" | tr ',' ',')
+
+          ssh root@188.166.237.231 << REMOTE
+          echo "Installing modules: $MODULES_LIST"
+          docker exec -t odoo18 odoo -d ${{ github.event.inputs.database }} \
+            --db_host=odoo-db \
+            --db_user=odoo \
+            --db_password=odoo \
+            --without-demo=all \
+            --stop-after-init \
+            -i $MODULES_LIST
+          REMOTE
+
+      - name: Restart Odoo
+        run: |
+          ssh root@188.166.237.231 "docker restart odoo18"
+          echo "Waiting for Odoo to restart..."
+          sleep 10
+
+      - name: Verify installation
+        run: |
+          ssh root@188.166.237.231 << 'REMOTE'
+          docker exec odoo-db psql -U odoo -d ${{ github.event.inputs.database }} -c "
+            SELECT name, state, shortdesc
+            FROM ir_module_module
+            WHERE name IN ('${{ github.event.inputs.modules }}')
+            ORDER BY name;
+          "
+          REMOTE
+
+      - name: Show installation summary
+        run: |
+          echo "✅ OCA Module Installation Complete!"
+          echo ""
+          echo "Modules requested: ${{ github.event.inputs.modules }}"
+          echo "OCA Version: ${{ github.event.inputs.oca_version }}"
+          echo "Database: ${{ github.event.inputs.database }}"
+          echo ""
+          echo "Access: https://insightpulseai.net"
+          echo ""
+          echo "Note: If modules failed to install, they may not be available"
+          echo "for Odoo ${{ github.event.inputs.oca_version }} yet."
+          echo ""
+          echo "To check installed modules:"
+          echo "1. Login to Odoo"
+          echo "2. Enable Developer Mode: ?debug=1"
+          echo "3. Go to Apps menu"
+          echo "4. Remove 'Apps' filter to see all modules"
