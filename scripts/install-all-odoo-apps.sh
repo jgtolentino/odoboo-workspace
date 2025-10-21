@@ -11,7 +11,7 @@ echo "=================================="
 # Step 1: Install baseline apps
 echo ""
 echo "Step 1/2: Installing baseline app pack..."
-docker compose -f compose/docker-compose.yml exec -T odoo18 \
+docker compose -f docker-compose.yml exec -T odoo18 \
   odoo -d "$DB" --without-demo=all --stop-after-init \
   -i base,web,web_responsive,mail,contacts,calendar,crm,project,hr,hr_holidays,hr_timesheet,hr_expense,account,stock,purchase,sale,documents,website,website_sale,mass_mailing || true
 
@@ -21,7 +21,7 @@ echo ""
 
 # Step 2: Install all remaining applications
 echo "Step 2/2: Installing all remaining applications..."
-docker compose -f compose/docker-compose.yml exec -T odoo18 bash -lc "python3 - <<'PY'
+docker compose -f docker-compose.yml exec -T odoo18 bash -lc "python3 - <<'PY'
 import odoo, odoo.api as api
 DB='$DB'
 odoo.tools.config['db_name']=DB
