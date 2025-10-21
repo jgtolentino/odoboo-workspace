@@ -25,8 +25,8 @@ jobs:
 
       - name: Copy script to droplet
         run: |
-          scp scripts/install-all-odoo-apps.sh root@128.199.124.77:/opt/fin-workspace/
+          scp scripts/install-all-odoo-apps.sh root@188.166.237.231:/opt/fin-workspace/
 
       - name: Run installation
         run: |
-          ssh root@128.199.124.77 "cd /opt/fin-workspace && chmod +x install-all-odoo-apps.sh && ./install-all-odoo-apps.sh ${{ github.event.inputs.database }}"
+          ssh root@188.166.237.231 "cd /opt/fin-workspace && chmod +x install-all-odoo-apps.sh && ./install-all-odoo-apps.sh ${{ github.event.inputs.database }}"
