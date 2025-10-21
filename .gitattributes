@@ -1,0 +1,3 @@
+* text=auto eol=lf
+docs/** linguist-generated=false
+build/** linguist-generated=true

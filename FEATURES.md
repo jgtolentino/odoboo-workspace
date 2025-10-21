@@ -15,6 +15,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 ## Core Infrastructure (✅ Implemented)
 
 ### Development Environment
+
 - ✅ Docker Compose setup for local Odoo 18 development
 - ✅ PostgreSQL 15 database with persistent volumes
 - ✅ Supabase integration (project: spdtwktxdalcfigzeqrz)
@@ -22,6 +23,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 - ✅ Environment variable management via `~/.zshrc`
 
 ### Deployment & CI/CD
+
 - ✅ DigitalOcean App Platform deployment automation
 - ✅ GitHub Actions workflows for visual parity testing
 - ✅ Database schema drift detection (daily cron)
@@ -29,6 +31,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 - ✅ DigitalOcean Container Registry (DOCR) integration
 
 ### OCR & Document Processing
+
 - ✅ FastAPI microservice with PaddleOCR-VL-900M
 - ✅ OpenAI gpt-4o-mini enhancement for structured extraction
 - ✅ DigitalOcean droplet deployment (188.166.237.231)
@@ -37,6 +40,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 - ✅ Confidence scoring and auto-approval (≥85%)
 
 ### Database & Storage
+
 - ✅ Supabase PostgreSQL with Row Level Security (RLS)
 - ✅ Task queue system (`task_queue` table)
 - ✅ Visual baseline storage (`visual_baseline` table)
@@ -48,6 +52,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 ## VS Code Extension (🔄 In Progress)
 
 ### Implemented Commands
+
 - ✅ `odoo.launch` - Launch Odoo server
 - ✅ `odoo.rpcConsole` - Interactive JSON-RPC console
 - ✅ `db.schemaGuard` - Database schema validation
@@ -56,9 +61,11 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 - ✅ `platform.checkStatus` - Deployment status monitoring
 
 ### TreeView Providers
+
 - ✅ Deployment Status TreeView - Real-time monitoring for Vercel, Supabase, GitHub Actions, DigitalOcean
 
 ### Pending Implementation (📋 Planned)
+
 - 📋 Docker management commands (stop, restart, update module)
 - 📋 Deployment commands (buildx AMD64, push to DOCR, verify image)
 - 📋 Queue monitor TreeView with Supabase integration
@@ -70,6 +77,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 ## Odoo Modules (🔄 In Progress)
 
 ### Implemented Modules
+
 - ✅ `hr_expense_ocr_audit` - OCR receipt processing with audit trail
   - PaddleOCR-VL integration
   - Visual diff with SSIM/LPIPS
@@ -84,11 +92,13 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
   - OCA-ready structure
 
 ### OCA Modules Installed (✅ Implemented)
+
 - ✅ `web_timeline` - Universal timeline views for all models
 - ✅ `auditlog` - Complete change tracking and audit trails
 - ✅ `queue_job` - Background job processing with monitoring
 
 ### Pending Modules (📋 Planned)
+
 - 📋 `mail_kanban_mentions` - @mention support in kanban cards
   - Email pattern detection in messages
   - Automatic activity creation for mentions
@@ -109,6 +119,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 ## Odoo-to-Next.js Bridge (📋 Planned)
 
 ### Architecture Strategy
+
 - 📋 No "auto-convert" approach - expose Odoo via stable API
 - 📋 OpenAPI specification generation from Odoo controllers
 - 📋 TypeScript type generation with `openapi-typescript`
@@ -117,6 +128,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 - 📋 Supabase sync alternative architecture
 
 ### Components to Build
+
 - 📋 OpenAPI generator script for Odoo controllers
 - 📋 TypeScript client SDK generation pipeline
 - 📋 React hooks with automatic type inference
@@ -128,6 +140,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 ## Task Bus & Orchestration (✅ Implemented)
 
 ### Task Routes
+
 - ✅ `DEPLOY_WEB` - Web frontend deployment
 - ✅ `DEPLOY_ADE` - OCR service deployment
 - ✅ `DOCS_SYNC` - Documentation synchronization
@@ -141,6 +154,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 - ✅ `ODOO_PACKAGE_RELEASE` - Package releases
 
 ### RPC Functions
+
 - ✅ `route_and_enqueue()` - Task routing and queue management
 - ✅ `rpc_runbot_record()` - Runbot record creation
 - ✅ `rpc_enqueue_odoo_visual()` - Visual diff task enqueuing
@@ -150,6 +164,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 ## Visual Regression Testing (✅ Implemented)
 
 ### Core Functionality
+
 - ✅ Playwright-based screenshot capture (`scripts/snap.js`)
 - ✅ SSIM-based comparison (`scripts/ssim.js`)
 - ✅ Baseline storage in Supabase (`visual_baseline` table)
@@ -157,6 +172,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 - ✅ GitHub Actions integration (`.github/workflows/visual-parity.yml`)
 
 ### Thresholds & Gates
+
 - ✅ Mobile: SSIM ≥ 0.97 (375x812 viewport, iPhone 13)
 - ✅ Desktop: SSIM ≥ 0.98 (1920x1080 viewport)
 - ✅ PR blocking on threshold failures
@@ -167,6 +183,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 ## Documentation & Project Management (✅ Implemented)
 
 ### Spec-Kit Framework
+
 - ✅ Product vision (`spec/00-product-vision.md`)
 - ✅ OCR expense processing specification (`spec/01-ocr-expense-processing.md`)
 - ✅ Architecture documentation (`plan/architecture.md`)
@@ -175,6 +192,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 - ✅ Constitution with 10 core principles
 
 ### Guides & Runbooks
+
 - ✅ OCR service deployment guide
 - ✅ Custom dashboard module guide
 - ✅ Enterprise vs Community gap analysis
@@ -185,16 +203,53 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 - ✅ Next.js Odoo UI parity guide
 
 ### New Documentation (🔄 In Progress)
+
 - 🔄 Changelog (CHANGELOG.md) - Keep a Changelog format
 - 🔄 Feature inventory (FEATURES.md) - This document
 - 📋 Task tracking integration in VS Code extension
 - 📋 Odoo-to-Next.js bridge guide
+
+### Knowledge Base & Spec-Kit Framework (✅ Implemented)
+
+- ✅ Knowledge base architecture (`docs/KB_OVERVIEW.md`)
+  - One-way directional sync from upstream sources
+  - Chunk index with SHA-1 IDs for deduplication
+  - Agent skill integration for doc-lookup
+- ✅ Knowledge base operations runbook (`docs/KB_RUNBOOK.md`)
+  - Upstream source refresh procedures
+  - Chunk rebuild and maintenance
+  - Search and retrieval workflows
+- ✅ Documentation writing guide (`docs/DOCS_WRITING_GUIDE.md`)
+  - Spec template (What & why)
+  - Runbook template (How to operate)
+  - ADR template (Architecture decisions)
+- ✅ Deterministic spec compilation (`scripts/spec_compile.sh`)
+  - Stable, sorted JSON output with jq
+  - Git hash tracking for drift detection
+  - CI workflow for build verification
+- ✅ Auto PR review system (`.github/workflows/pr-review-odoobo.yml`)
+  - odoobo-expert agent integration
+  - Automatic code review on every PR
+  - GitHub Actions workflow automation
+
+### MCP Server for Spec Inventory (✅ Implemented)
+
+- ✅ TypeScript MCP server (`mcp-servers/spec-inventory/`)
+  - list_features tool with status/category filtering
+  - search_specs tool for full-text search across docs
+  - read_spec tool for complete spec file retrieval
+  - get_feature_stats tool for implementation progress metrics
+- ✅ Example spec: Knowledge base integration (`spec/03-knowledge-base-integration.md`)
+  - 4-week implementation timeline
+  - Complete architecture and workflow documentation
+  - Security and licensing guardrails
 
 ---
 
 ## Mobile Applications (📋 Planned)
 
 ### Expo/React Native App
+
 - 📋 Offline-first architecture with SQLite
 - 📋 Native camera integration for receipt capture
 - 📋 Sync with Supabase on connectivity
@@ -202,6 +257,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 - 📋 Bandwidth-aware image compression (<2MB)
 
 ### Features
+
 - 📋 Expense submission with OCR
 - 📋 Task management
 - 📋 Real-time collaboration
@@ -213,6 +269,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 ## API & Integration (📋 Planned)
 
 ### External Integrations
+
 - 📋 Concur expense export
 - 📋 Slack notifications
 - 📋 Email alerts
@@ -220,6 +277,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 - 📋 OAuth2 provider for third-party apps
 
 ### API Enhancements
+
 - 📋 GraphQL layer over Supabase REST
 - 📋 Rate limiting and throttling
 - 📋 API versioning strategy
@@ -230,6 +288,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 ## Performance & Optimization (📋 Planned)
 
 ### Backend
+
 - 📋 GPU acceleration for OCR (10x faster processing)
 - 📋 Redis caching layer
 - 📋 Database query optimization
@@ -237,6 +296,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 - 📋 CDN integration for static assets
 
 ### Frontend
+
 - 📋 Code splitting and lazy loading
 - 📋 Service worker for offline support
 - 📋 Image optimization pipeline
@@ -248,6 +308,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 ## Security & Compliance (📋 Planned)
 
 ### Security Enhancements
+
 - 📋 Two-factor authentication (2FA)
 - 📋 Audit log retention policies
 - 📋 Encryption at rest for sensitive data
@@ -255,6 +316,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 - 📋 OWASP compliance validation
 
 ### Compliance
+
 - 📋 GDPR compliance tools (data export, deletion)
 - 📋 SOC 2 audit preparation
 - 📋 HIPAA compliance (if handling healthcare data)
@@ -265,6 +327,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 ## Analytics & Monitoring (📋 Planned)
 
 ### Observability
+
 - 📋 Prometheus metrics export
 - 📋 Grafana dashboards
 - 📋 Application performance monitoring (APM)
@@ -272,6 +335,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 - 📋 Log aggregation with Loki
 
 ### Business Analytics
+
 - 📋 Expense analytics dashboard
 - 📋 OCR accuracy tracking
 - 📋 User engagement metrics
@@ -282,6 +346,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 ## Deprecated Features (❌)
 
 ### Azure Infrastructure
+
 - ❌ Azure Container Registry (ACR) - Replaced by DigitalOcean Container Registry
 - ❌ Azure Container Instances (ACI) - Replaced by DigitalOcean App Platform
 - ❌ Azure Document Intelligence - Replaced by PaddleOCR-VL-900M
@@ -289,6 +354,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 - ❌ Azure Key Vault - Replaced by environment variables + Supabase Vault
 
 ### Other Deprecated
+
 - ❌ Bruno executor - Deprecated executor service
 - ❌ Notion API integration - Removed from architecture
 - ❌ Local Docker for production - Replaced by DigitalOcean App Platform
@@ -298,16 +364,19 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 ## Success Metrics
 
 ### Performance Targets (✅ Implemented)
+
 - ✅ OCR Processing: P95 <30s (receipt upload → fields filled)
 - ✅ Auto-Approval Rate: ≥85% (confidence ≥0.85)
 - ✅ Monthly Cost: <$20 USD (87% reduction from $100 Azure budget)
 
 ### Quality Targets (✅ Implemented)
+
 - ✅ OCR Accuracy: ≥95% on vendor, amount, date
 - ✅ Visual Parity: SSIM ≥0.97 (mobile), ≥0.98 (desktop)
 - ✅ Database Schema Compliance: 100% (daily drift detection)
 
 ### Pending Targets (📋 Planned)
+
 - 📋 Uptime: 99.9% (8.7 hours downtime/year)
 - 📋 API Response Time: P95 <200ms
 - 📋 Mobile TTI: <2.5s on 3G
@@ -318,6 +387,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 ## Roadmap Milestones
 
 ### P0 (MVP - Completed ✅)
+
 - ✅ Single receipt OCR (vendor, amount, date, tax)
 - ✅ Mobile photo upload with offline draft
 - ✅ Confidence scoring and auto-approval (≥85%)
@@ -325,6 +395,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 - ✅ DigitalOcean deployment (CPU mode)
 
 ### P1 (v1.0 - In Progress 🔄)
+
 - 🔄 VS Code extension with Docker/deployment management
 - 📋 Change detection (visual + JSON diff)
 - 📋 Batch processing (50+ receipts)
@@ -333,6 +404,7 @@ Comprehensive catalog of implemented, in-progress, and planned features for the 
 - 📋 Multi-language support (ES, FR, JA, ZH)
 
 ### P2 (v2.0 - Planned 📋)
+
 - 📋 GPU acceleration (10x faster processing)
 - 📋 Advanced analytics (fraud risk scoring)
 - 📋 Handwritten receipt support (experimental)
