@@ -7,8 +7,6 @@ class ResUsers(models.Model):
     _inherit = 'res.users'
 
     ALLOWED_GOOGLE_DOMAINS = [
-        'tbwa-smp.com',
-        'oomc.com',
         'gmail.com',
     ]
 
@@ -23,7 +21,7 @@ class ResUsers(models.Model):
 
             if domain not in self.ALLOWED_GOOGLE_DOMAINS:
                 raise AccessDenied(
-                    _('Your email domain (@%s) is not allowed. Please use @tbwa-smp.com, @oomc.com, or @gmail.com') % domain
+                    _('Only @gmail.com is allowed for Google sign-in. For @tbwa-smp.com or @oomc.com, please use Magic Link authentication.')
                 )
 
         return validation

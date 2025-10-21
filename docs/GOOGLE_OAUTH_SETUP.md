@@ -4,11 +4,14 @@ This guide explains how to configure Google OAuth authentication for your Odoo i
 
 ## Allowed Email Domains
 
-The following email domains are allowed for automatic user creation:
+**Google OAuth** is ONLY for:
 
-- `@tbwa-smp.com`
-- `@oomc.com`
 - `@gmail.com`
+
+**For corporate emails (@tbwa-smp.com, @oomc.com):**
+
+- Use **Magic Link Authentication** instead
+- Access at: `/auth/magic-link-form`
 
 ## Setup Steps
 
@@ -61,7 +64,7 @@ When a user from an allowed domain signs in with Google OAuth:
 
 ### "Email domain not allowed" Error
 
-**Solution**: Ensure your email ends with @tbwa-smp.com, @oomc.com, or @gmail.com
+**Solution**: Google OAuth only works with @gmail.com. For @tbwa-smp.com or @oomc.com, use Magic Link authentication instead.
 
 ### "Redirect URI mismatch" Error
 

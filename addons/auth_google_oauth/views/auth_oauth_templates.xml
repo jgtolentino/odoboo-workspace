@@ -12,7 +12,7 @@
                     Sign in with Google
                 </a>
                 <div class="mt-2 text-muted" style="font-size: 0.85em;">
-                    Allowed domains: @tbwa-smp.com, @oomc.com, @gmail.com
+                    Google: @gmail.com only | <a href="/auth/magic-link-form">Magic Link</a>: @tbwa-smp.com, @oomc.com
                 </div>
             </div>
         </xpath>
