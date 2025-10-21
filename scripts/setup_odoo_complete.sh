@@ -7,7 +7,7 @@
 set -e
 
 CONTAINER="${ODOO_CONTAINER:-odoo18}"
-DB_NAME="${ODOO_DB:-odoboo_local}"
+DB_NAME="${ODOO_DB:-insightpulse_prod}"
 ADMIN_EMAIL="jgtolentino_rn@yahoo.com"
 ADMIN_PASSWORD="admin123"
 
