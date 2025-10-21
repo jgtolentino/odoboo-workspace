@@ -44,6 +44,15 @@ jobs:
           echo "Admin: $ADMIN_EMAIL"
           echo ""
 
+          # Install all core Odoo apps
+          echo "📦 Installing all Odoo apps..."
+          docker exec -i $CONTAINER odoo -d $DB_NAME \
+            -i base,web,project,mail,hr,hr_expense,crm,sale,sale_management,purchase,stock,account,calendar,contacts,website,knowledge,documents \
+            --without-demo=all \
+            --stop-after-init || echo "Apps already installed"
+
+          echo ""
+
           # Run setup via Odoo shell
           docker exec -i $CONTAINER odoo shell -d $DB_NAME <<'PYEOF'
           env = env.sudo()
