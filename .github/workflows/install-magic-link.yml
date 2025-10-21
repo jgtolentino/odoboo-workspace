@@ -1,0 +1,54 @@
+name: Install Magic Link Auth
+
+on:
+  workflow_dispatch:
+    inputs:
+      database:
+        description: 'Database name'
+        required: false
+        default: 'insightpulse_prod'
+
+jobs:
+  install-magic-link:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DROPLET_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 188.166.237.231 >> ~/.ssh/known_hosts
+
+      - name: Copy module to droplet
+        run: |
+          ssh root@188.166.237.231 "mkdir -p /opt/odoo/addons"
+          scp -r addons/auth_magic_link root@188.166.237.231:/opt/odoo/addons/
+
+      - name: Copy installation script
+        run: |
+          scp scripts/install-magic-link.sh root@188.166.237.231:/opt/odoo/
+
+      - name: Install magic link module
+        run: |
+          ssh root@188.166.237.231 "cd /opt/odoo && chmod +x install-magic-link.sh && ./install-magic-link.sh ${{ github.event.inputs.database }}"
+
+      - name: Restart Odoo
+        run: |
+          ssh root@188.166.237.231 "docker restart odoo18"
+
+      - name: Show access information
+        run: |
+          echo "✅ Magic Link Authentication installed!"
+          echo ""
+          echo "Access URLs:"
+          echo "- Magic Link Login: http://your-odoo-url/auth/magic-link-form"
+          echo "- Standard Login: http://your-odoo-url/web/login"
+          echo ""
+          echo "Features:"
+          echo "- Passwordless authentication via email"
+          echo "- Secure 15-minute token expiration"
+          echo "- Beautiful email templates"
+          echo "- Automatic cleanup of expired tokens"
