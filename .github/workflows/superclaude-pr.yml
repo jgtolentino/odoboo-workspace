@@ -31,9 +31,9 @@ jobs:
       - name: Create/Update Odoo Task
         id: create_task
         env:
-          ODOO_URL: https://insightpulseai.net
-          ODOO_DATABASE: odoboo_prod
-          ODOO_USER: admin@insightpulseai.net
+          ODOO_URL: ${{ secrets.ODOO_URL }}
+          ODOO_DATABASE: ${{ secrets.ODOO_DATABASE }}
+          ODOO_USER: ${{ secrets.ODOO_USER }}
           ODOO_API_KEY: ${{ secrets.ODOO_API_KEY }}
         run: |
           python scripts/odoo_kanban_sync.py pr_opened <<EOF
@@ -244,9 +244,9 @@ jobs:
 
       - name: Update Odoo Kanban
         env:
-          ODOO_URL: https://insightpulseai.net
-          ODOO_DATABASE: odoboo_prod
-          ODOO_USER: admin@insightpulseai.net
+          ODOO_URL: ${{ secrets.ODOO_URL }}
+          ODOO_DATABASE: ${{ secrets.ODOO_DATABASE }}
+          ODOO_USER: ${{ secrets.ODOO_USER }}
           ODOO_API_KEY: ${{ secrets.ODOO_API_KEY }}
         run: |
           python scripts/odoo_kanban_sync.py ${{ steps.aggregate.outputs.event }} <<EOF

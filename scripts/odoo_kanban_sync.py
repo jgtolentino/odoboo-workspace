@@ -128,11 +128,11 @@ def update_task_stage(task_id, stage_name, build_status=None, env=None):
 
 def post_to_discuss(channel_name, message):
     """Post message to Odoo Discuss channel"""
-    # Get or create channel
-    channel_ids = execute('mail.channel', 'search', [('name', '=', channel_name)])
+    # Get or create channel (Odoo 18 uses discuss.channel, not mail.channel)
+    channel_ids = execute('discuss.channel', 'search', [('name', '=', channel_name)])
 
     if not channel_ids:
-        channel_id = execute('mail.channel', 'create', {
+        channel_id = execute('discuss.channel', 'create', {
             'name': channel_name,
             'channel_type': 'channel',
             'public': 'public',
@@ -142,7 +142,7 @@ def post_to_discuss(channel_name, message):
         channel_id = channel_ids[0]
 
     # Post message
-    execute('mail.channel', 'message_post', channel_id, {
+    execute('discuss.channel', 'message_post', channel_id, {
         'body': message,
         'message_type': 'comment',
         'subtype_xmlid': 'mail.mt_comment',

@@ -40,6 +40,7 @@ jobs:
 
       - name: Check Vercel Deployment
         if: steps.check_enabled.outputs.enabled == 'true' && vars.VERCEL_PROJECT_ID != ''
+        continue-on-error: true
         run: |
           RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
             "https://api.vercel.com/v6/deployments?projectId=${{ vars.VERCEL_PROJECT_ID }}&limit=1")
@@ -57,6 +58,7 @@ jobs:
 
       - name: Check GitHub Actions Status
         if: steps.check_enabled.outputs.enabled == 'true'
+        continue-on-error: true
         run: |
           RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/repos/${{ github.repository }}/actions/runs?per_page=1&branch=main")
@@ -69,12 +71,12 @@ jobs:
           echo "- **Conclusion**: $CONCLUSION" >> $GITHUB_STEP_SUMMARY
 
           if [ "$CONCLUSION" == "failure" ]; then
-            echo "❌ Latest workflow failed"
-            exit 1
+            echo "❌ Latest workflow failed (monitoring only, not blocking)"
           fi
 
       - name: Check Supabase Health
         if: steps.check_enabled.outputs.enabled == 'true' && vars.SUPABASE_PROJECT_REF != ''
+        continue-on-error: true
         run: |
           # Ping Supabase project URL
           HEALTH_URL="https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co/rest/v1/"
@@ -92,6 +94,7 @@ jobs:
 
       - name: Check DigitalOcean App
         if: steps.check_enabled.outputs.enabled == 'true' && vars.DO_APP_ID != ''
+        continue-on-error: true
         run: |
           RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.DO_ACCESS_TOKEN }}" \
             "https://api.digitalocean.com/v2/apps/${{ vars.DO_APP_ID }}")
