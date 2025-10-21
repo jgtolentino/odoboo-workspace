@@ -1,0 +1,68 @@
+name: Install Okta SAML Auth
+
+on:
+  workflow_dispatch:
+    inputs:
+      database:
+        description: 'Database name'
+        required: false
+        default: 'insightpulse_prod'
+
+jobs:
+  install-okta:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DROPLET_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 188.166.237.231 >> ~/.ssh/known_hosts
+
+      - name: Copy modules to droplet
+        run: |
+          ssh root@188.166.237.231 "mkdir -p /opt/odoo/addons"
+          scp -r addons/auth_okta_saml root@188.166.237.231:/opt/odoo/addons/
+          scp -r addons/auth_google_oauth root@188.166.237.231:/opt/odoo/addons/
+
+      - name: Update magic link module
+        run: |
+          scp -r addons/auth_magic_link root@188.166.237.231:/opt/odoo/addons/
+
+      - name: Install Okta SAML module
+        run: |
+          ssh root@188.166.237.231 "docker exec -t odoo18 odoo -d ${{ github.event.inputs.database }} --db_host=odoo-db --db_user=odoo --db_password=odoo --without-demo=all --stop-after-init -i auth_okta_saml"
+
+      - name: Update auth modules
+        run: |
+          ssh root@188.166.237.231 "docker exec -t odoo18 odoo -d ${{ github.event.inputs.database }} --db_host=odoo-db --db_user=odoo --db_password=odoo --without-demo=all --stop-after-init -u auth_magic_link,auth_google_oauth"
+
+      - name: Restart Odoo
+        run: |
+          ssh root@188.166.237.231 "docker restart odoo18"
+
+      - name: Show authentication summary
+        run: |
+          echo "✅ Enterprise SSO Authentication Installed!"
+          echo ""
+          echo "Authentication Methods:"
+          echo "┌───────────────────┬─────────────────┬─────────────────────────┐"
+          echo "│ Domain            │ Primary Method  │ Backup Method           │"
+          echo "├───────────────────┼─────────────────┼─────────────────────────┤"
+          echo "│ @tbwa-smp.com     │ Okta SSO        │ Magic Link              │"
+          echo "│ @oomc.com         │ Okta SSO        │ Magic Link              │"
+          echo "│ @gmail.com        │ Google OAuth    │ Magic Link              │"
+          echo "└───────────────────┴─────────────────┴─────────────────────────┘"
+          echo ""
+          echo "Access URLs:"
+          echo "- Okta SSO: /auth_saml/signin/okta"
+          echo "- Google OAuth: /auth_oauth/signin/google"
+          echo "- Magic Link: /auth/magic-link-form"
+          echo ""
+          echo "Next Steps:"
+          echo "1. Configure Okta SAML app (see docs/OKTA_SSO_SETUP.md)"
+          echo "2. Update Okta metadata in Odoo settings"
+          echo "3. Test with khalil.veracruz@tbwa-smp.com"
