@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Add Okta SSO button to login page -->
+    <template id="okta_saml_button" inherit_id="web.login" name="Okta SSO Button">
+        <xpath expr="//form[@class='oe_login_form']" position="after">
+            <div class="text-center mt-3">
+                <div class="mb-2">
+                    <span class="text-muted">Corporate SSO</span>
+                </div>
+                <a href="/auth_saml/signin/okta" class="btn btn-primary btn-block mb-2">
+                    <i class="fa fa-key me-2"></i>
+                    Sign in with Okta
+                </a>
+                <div class="text-muted" style="font-size: 0.85em;">
+                    For @tbwa-smp.com and @oomc.com employees
+                </div>
+            </div>
+        </xpath>
+    </template>
+</odoo>

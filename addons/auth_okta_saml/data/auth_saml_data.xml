@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Okta SAML Provider -->
+        <record id="provider_okta" model="auth.saml.provider">
+            <field name="name">Okta SSO</field>
+            <field name="idp_metadata_url">https://YOUR_OKTA_DOMAIN.okta.com/app/APP_ID/sso/saml/metadata</field>
+            <field name="sp_baseurl">https://your-odoo-domain.com</field>
+            <field name="body">Sign in with Okta</field>
+            <field name="css_class">fa fa-key</field>
+            <field name="enabled" eval="True"/>
+            <field name="sig_alg">http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</field>
+            <field name="matching_attribute">email</field>
+        </record>
+    </data>
+</odoo>
