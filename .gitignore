@@ -143,3 +143,4 @@ verify-production.sh
 
 # Demo and Testing
 demo/
+CREDENTIALS.md

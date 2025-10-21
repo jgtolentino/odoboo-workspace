@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Add Google Sign-in button to login page -->
+    <template id="google_oauth_button" inherit_id="web.login" name="Google OAuth Button">
+        <xpath expr="//form[@class='oe_login_form']" position="after">
+            <div class="text-center mt-3">
+                <div class="mb-2">
+                    <span class="text-muted">or</span>
+                </div>
+                <a href="/auth_oauth/signin/google" class="btn btn-outline-primary btn-block">
+                    <i class="fa fa-google me-2"></i>
+                    Sign in with Google
+                </a>
+                <div class="mt-2 text-muted" style="font-size: 0.85em;">
+                    Allowed domains: @tbwa-smp.com, @oomc.com, @gmail.com
+                </div>
+            </div>
+        </xpath>
+    </template>
+</odoo>

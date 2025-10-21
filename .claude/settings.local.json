@@ -72,7 +72,14 @@
       "Bash(ssh -F /dev/null -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_ed25519 root@188.166.237.231 \"cd /opt/fin-workspace && DB_NAME=twba-fin-ops bash setup_notion_workspace.sh\")",
       "Bash(GITHUB_TOKEN=\"\" gh run view 18670457230 --repo jgtolentino/odoboo-workspace --log)",
       "Bash(ssh -F /dev/null -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_ed25519 root@188.166.237.231 \"docker exec -i odoo18 psql -h db -U odoo -l\")",
-      "Bash(GITHUB_TOKEN=\"\" gh run view 18670457230 --repo jgtolentino/odoboo-workspace --json conclusion,status,displayTitle)"
+      "Bash(GITHUB_TOKEN=\"\" gh run view 18670457230 --repo jgtolentino/odoboo-workspace --json conclusion,status,displayTitle)",
+      "Bash(GITHUB_TOKEN=\"\" gh run list --workflow=auto-deploy-odoo.yml --repo jgtolentino/odoboo-workspace --limit 1)",
+      "Bash(DB_NAME=odoboo_local ./scripts/setup_notion_workspace.sh)",
+      "Bash(docker exec -i postgres15 psql -U odoo -d odoboo_local -c \"SELECT id, login, email, active FROM res_users WHERE id = 2;\")",
+      "Bash(doctl compute droplet list --format ID,Name,PublicIPv4,Status)",
+      "Bash(GITHUB_TOKEN=\"\" gh workflow run install-magic-link.yml --repo jgtolentino/odoboo-workspace)",
+      "Bash(GITHUB_TOKEN=\"\" gh run list --workflow=install-magic-link.yml --repo jgtolentino/odoboo-workspace --limit 1)",
+      "Bash(GITHUB_TOKEN=\"\" gh run watch 18670850272 --repo jgtolentino/odoboo-workspace --exit-status)"
     ],
     "deny": [],
     "ask": []

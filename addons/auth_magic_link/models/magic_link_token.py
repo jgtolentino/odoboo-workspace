@@ -21,9 +21,14 @@ class MagicLinkToken(models.Model):
     @api.model
     def generate_magic_link(self, email):
         """Generate a magic link for the given email address"""
+        # Check if user exists, if not create them (for allowed domains)
         user = self.env['res.users'].search([('login', '=', email)], limit=1)
         if not user:
-            raise ValidationError(_('No user found with email: %s') % email)
+            # Try to auto-create user for allowed domains
+            try:
+                user = self.env['res.users'].create_magic_link_user(email)
+            except ValidationError:
+                raise ValidationError(_('Email domain not allowed. Please use @tbwa-smp.com, @oomc.com, or @gmail.com'))
 
         # Generate secure token
         token = secrets.token_urlsafe(32)
