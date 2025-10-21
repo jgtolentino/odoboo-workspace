@@ -1,0 +1,85 @@
+name: Build and Push Container Images
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/ocr-service/**'
+      - 'services/agent-service/**'
+      - 'Dockerfile'
+      - '.github/workflows/build-push-images.yml'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/odoboo
+
+jobs:
+  build-ocr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push OCR service
+        run: |
+          docker build -t ${{ env.IMAGE_PREFIX }}-ocr:latest \
+                       -t ${{ env.IMAGE_PREFIX }}-ocr:${{ github.sha }} \
+                       ./services/ocr-service
+          docker push ${{ env.IMAGE_PREFIX }}-ocr:latest
+          docker push ${{ env.IMAGE_PREFIX }}-ocr:${{ github.sha }}
+
+  build-agent:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Agent service
+        run: |
+          docker build -t ${{ env.IMAGE_PREFIX }}-agent:latest \
+                       -t ${{ env.IMAGE_PREFIX }}-agent:${{ github.sha }} \
+                       ./services/agent-service
+          docker push ${{ env.IMAGE_PREFIX }}-agent:latest
+          docker push ${{ env.IMAGE_PREFIX }}-agent:${{ github.sha }}
+
+  build-odoo:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Odoo service
+        run: |
+          docker build -t ${{ env.IMAGE_PREFIX }}-odoo:latest \
+                       -t ${{ env.IMAGE_PREFIX }}-odoo:${{ github.sha }} \
+                       -f Dockerfile .
+          docker push ${{ env.IMAGE_PREFIX }}-odoo:latest
+          docker push ${{ env.IMAGE_PREFIX }}-odoo:${{ github.sha }}
