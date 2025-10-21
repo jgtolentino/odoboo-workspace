@@ -1,0 +1,36 @@
+name: Auto-Deploy Odoo on Merge
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'addons/**'
+      - 'config/**'
+      - 'scripts/**'
+      - 'docker-compose.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DROPLET_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 188.166.237.231 >> ~/.ssh/known_hosts
+
+      - name: Deploy to droplet
+        run: |
+          ssh root@188.166.237.231 "cd /opt/odoo && git pull origin main || true"
+          ssh root@188.166.237.231 "docker restart odoo18"
+
+      - name: Send deployment notification
+        if: success()
+        run: |
+          echo "Deployment successful to insightpulse_prod"
+          echo "Odoo instance restarted at $(date)"

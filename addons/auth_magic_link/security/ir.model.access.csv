@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_magic_link_token_user,auth.magic.link.token.user,model_auth_magic_link_token,base.group_user,1,0,0,0
+access_magic_link_token_system,auth.magic.link.token.system,model_auth_magic_link_token,base.group_system,1,1,1,1

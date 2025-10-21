@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Magic Link Request Form -->
+    <template id="magic_link_request_form" name="Magic Link Login">
+        <t t-call="web.login_layout">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h3 class="card-title text-center mb-4">Sign in with Magic Link</h3>
+                                <p class="text-muted text-center">
+                                    Enter your email address and we'll send you a magic link to sign in.
+                                </p>
+                                <form id="magic-link-form" class="mt-4">
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">Email Address</label>
+                                        <input type="email" class="form-control" id="email" name="email"
+                                               placeholder="you@example.com" required="required"/>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        Send Magic Link
+                                    </button>
+                                </form>
+                                <div id="message" class="mt-3"></div>
+                                <div class="text-center mt-3">
+                                    <a href="/web/login" class="text-muted">
+                                        Back to password login
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                document.getElementById('magic-link-form').addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const email = document.getElementById('email').value;
+                    const messageDiv = document.getElementById('message');
+
+                    try {
+                        const response = await fetch('/auth/request-magic-link', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                jsonrpc: '2.0',
+                                method: 'call',
+                                params: {email: email},
+                            }),
+                        });
+
+                        const result = await response.json();
+
+                        if (result.result &amp;&amp; result.result.success) {
+                            messageDiv.innerHTML = '&lt;div class="alert alert-success"&gt;' +
+                                                 result.result.message + '&lt;/div&gt;';
+                        } else {
+                            messageDiv.innerHTML = '&lt;div class="alert alert-danger"&gt;' +
+                                                 (result.result ? result.result.message : 'An error occurred') +
+                                                 '&lt;/div&gt;';
+                        }
+                    } catch (error) {
+                        messageDiv.innerHTML = '&lt;div class="alert alert-danger"&gt;Network error. Please try again.&lt;/div&gt;';
+                    }
+                });
+            </script>
+        </t>
+    </template>
+
+    <!-- Magic Link Expired Template -->
+    <template id="magic_link_expired" name="Magic Link Expired">
+        <t t-call="web.login_layout">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <div class="alert alert-danger">
+                            <h4>Magic Link Expired or Invalid</h4>
+                            <p>This magic link has expired or has already been used.</p>
+                            <a href="/auth/magic-link-form" class="btn btn-primary">
+                                Request a new magic link
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>
