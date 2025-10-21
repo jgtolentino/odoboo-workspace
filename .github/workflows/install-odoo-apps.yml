@@ -1,0 +1,31 @@
+name: Install All Odoo Apps
+
+on:
+  workflow_dispatch:
+    inputs:
+      database:
+        description: 'Database name'
+        required: false
+        default: 'insightpulse_prod'
+
+jobs:
+  install-apps:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DROPLET_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 128.199.124.77 >> ~/.ssh/known_hosts
+
+      - name: Copy script to droplet
+        run: |
+          scp scripts/install-all-odoo-apps.sh root@128.199.124.77:/opt/fin-workspace/
+
+      - name: Run installation
+        run: |
+          ssh root@128.199.124.77 "cd /opt/fin-workspace && chmod +x install-all-odoo-apps.sh && ./install-all-odoo-apps.sh ${{ github.event.inputs.database }}"
