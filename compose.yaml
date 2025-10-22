@@ -17,7 +17,6 @@ services:
 
   odoo:
     build: ./docker/odoo
-    command: ["odoo", "-c", "/etc/odoo/odoo.conf", "--longpolling-port", "8072"]
     depends_on:
       db:
         condition: service_healthy
