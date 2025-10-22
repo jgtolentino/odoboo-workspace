@@ -25,8 +25,8 @@ RUN pip install --no-cache-dir \
     pytesseract==0.3.10 \
     opencv-python-headless==4.8.1.78
 
-# Force NumPy 1.x for ABI compatibility (must be after other dependencies)
-RUN pip install --no-cache-dir --force-reinstall numpy==1.24.3
+# Force NumPy 1.x and compatible scipy for ABI compatibility (must be after other dependencies)
+RUN pip install --no-cache-dir --force-reinstall numpy==1.24.3 scipy==1.12.0
 
 # Models will download on first startup (skipping build-time download for faster builds)
 
