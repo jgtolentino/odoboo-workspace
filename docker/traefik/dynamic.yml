@@ -21,12 +21,13 @@ http:
 
   routers:
     odoo-longpolling:
-      rule: "Host(`insightpulseai.net`) && PathPrefix(`/longpolling`)"
+      rule: "Host(`insightpulseai.net`) && (PathPrefix(`/longpolling`) || PathPrefix(`/websocket`))"
       service: odoo-longpolling
       entryPoints:
         - websecure
       tls:
         certResolver: letsencrypt
+      priority: 100
 
   services:
     odoo-longpolling:
