@@ -58,7 +58,7 @@ services:
       - "services.odoo.com:127.0.0.1"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.odoo.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.odoo.rule=Host(`insightpulseai.net`)"
       - "traefik.http.routers.odoo.entrypoints=websecure"
       - "traefik.http.routers.odoo.tls.certresolver=letsencrypt"
       - "traefik.http.services.odoo.loadbalancer.server.port=8069"

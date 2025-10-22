@@ -18,3 +18,6 @@ http:
         referrerPolicy: "no-referrer"
         contentSecurityPolicy: "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self'"
         permissionsPolicy: "camera=(), geolocation=()"
+
+# Note: Router configuration moved to compose.yaml Docker labels
+# Traefik file provider does not expand environment variables
