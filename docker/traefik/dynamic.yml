@@ -2,8 +2,8 @@ http:
   middlewares:
     rate-login:
       rateLimit:
-        average: 20
-        burst: 40
+        average: 5
+        burst: 10
 
     security-headers:
       headers:
@@ -19,5 +19,20 @@ http:
         contentSecurityPolicy: "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self'"
         permissionsPolicy: "camera=(), geolocation=()"
 
-# Note: Router configuration moved to compose.yaml Docker labels
+  routers:
+    odoo-longpolling:
+      rule: "Host(`insightpulseai.net`) && PathPrefix(`/longpolling`)"
+      service: odoo-longpolling
+      entryPoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    odoo-longpolling:
+      loadBalancer:
+        servers:
+          - url: "http://odoo:8072"
+
+# Note: Main Odoo router in compose.yaml Docker labels
 # Traefik file provider does not expand environment variables

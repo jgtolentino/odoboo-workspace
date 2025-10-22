@@ -17,6 +17,7 @@ services:
 
   odoo:
     build: ./docker/odoo
+    command: ["odoo", "-c", "/etc/odoo/odoo.conf", "--longpolling-port", "8072"]
     depends_on:
       db:
         condition: service_healthy
@@ -41,6 +42,9 @@ services:
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_NAME: insightpulseai.net
+    expose:
+      - "8069"
+      - "8072"
     volumes:
       - odoo-data:/var/lib/odoo
       - ./config/odoo/odoo.conf:/etc/odoo/odoo.conf:ro
