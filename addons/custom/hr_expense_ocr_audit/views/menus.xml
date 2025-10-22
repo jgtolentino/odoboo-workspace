@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Menu under Expenses -->
+    <menuitem id="menu_hr_expense_ocr_root"
+              name="OCR Processing"
+              parent="hr_expense.menu_hr_expense_root"
+              sequence="50"/>
+
+    <menuitem id="menu_hr_expense_ocr_review"
+              name="Review Queue"
+              action="action_hr_expense_ocr_review"
+              parent="menu_hr_expense_ocr_root"
+              sequence="10"/>
+
+    <menuitem id="menu_hr_expense_ocr_history"
+              name="Processing History"
+              action="action_hr_expense_ocr_all"
+              parent="menu_hr_expense_ocr_root"
+              sequence="20"/>
+</odoo>

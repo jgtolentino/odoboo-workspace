@@ -68,6 +68,38 @@ services:
       - "traefik.http.routers.odoo.middlewares=rate-login@file,security-headers@file"
     restart: unless-stopped
 
+  ocr-service:
+    build: ./docker/ocr
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 2g
+        reservations:
+          memory: 1g
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ocr.rule=Host(`insightpulseai.net`) && PathPrefix(`/api/ocr`)"
+      - "traefik.http.routers.ocr.entrypoints=websecure"
+      - "traefik.http.routers.ocr.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.ocr.priority=200"
+      - "traefik.http.services.ocr.loadbalancer.server.port=8000"
+      - "traefik.http.routers.ocr.middlewares=rate-ocr@file,security-headers@file"
+    restart: unless-stopped
+
   traefik:
     image: traefik:v3.1
     command:

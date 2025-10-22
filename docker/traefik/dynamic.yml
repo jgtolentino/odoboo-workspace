@@ -5,6 +5,11 @@ http:
         average: 5
         burst: 10
 
+    rate-ocr:
+      rateLimit:
+        average: 10
+        burst: 20
+
     security-headers:
       headers:
         frameDeny: true
