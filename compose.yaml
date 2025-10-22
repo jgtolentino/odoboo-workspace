@@ -97,7 +97,8 @@ services:
       - "traefik.http.routers.ocr.tls.certresolver=letsencrypt"
       - "traefik.http.routers.ocr.priority=200"
       - "traefik.http.services.ocr.loadbalancer.server.port=8000"
-      - "traefik.http.routers.ocr.middlewares=rate-ocr@file,security-headers@file"
+      - "traefik.http.middlewares.strip-ocr.stripprefix.prefixes=/api/ocr"
+      - "traefik.http.routers.ocr.middlewares=strip-ocr,rate-ocr@file,security-headers@file"
     restart: unless-stopped
 
   traefik:
