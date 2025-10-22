@@ -14,6 +14,9 @@ RUN apt-get update && apt-get install -y \
     libgl1 \
     && rm -rf /var/lib/apt/lists/*
 
+# Install NumPy first to ensure ABI compatibility
+RUN pip install --no-cache-dir numpy==1.24.3
+
 # Install Python dependencies
 RUN pip install --no-cache-dir \
     fastapi==0.104.1 \
