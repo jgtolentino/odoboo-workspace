@@ -70,6 +70,8 @@ services:
 
   ocr-service:
     build: ./docker/ocr
+    environment:
+      OCR_API_KEY: ${OCR_API_KEY}
     deploy:
       resources:
         limits:
@@ -98,7 +100,7 @@ services:
       - "traefik.http.routers.ocr.priority=200"
       - "traefik.http.services.ocr.loadbalancer.server.port=8000"
       - "traefik.http.middlewares.strip-ocr.stripprefix.prefixes=/api/ocr"
-      - "traefik.http.routers.ocr.middlewares=strip-ocr,rate-ocr@file,security-headers@file"
+      - "traefik.http.routers.ocr.middlewares=strip-ocr,rate-ocr@file,ocr-buffer@file,ocr-security@file"
     restart: unless-stopped
 
   traefik:

@@ -7,11 +7,12 @@ Provides OCR services for Odoo hr.expense integration
 import io
 import json
 import logging
+import os
 import re
 from datetime import datetime
 from typing import Dict, List, Optional
 
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Header, Depends
 from fastapi.responses import JSONResponse
 from PIL import Image
 from paddleocr import PaddleOCR
@@ -23,6 +24,9 @@ from preprocess import preprocess_image
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# API Key from environment variable
+OCR_API_KEY = os.environ.get("OCR_API_KEY", "")
 
 # Initialize FastAPI
 app = FastAPI(
@@ -41,6 +45,29 @@ ocr_engine = PaddleOCR(
     rec_model_dir=None,  # Use default
     cls_model_dir=None   # Use default
 )
+
+def verify_api_key(x_api_key: str = Header("", alias="X-API-Key")):
+    """
+    Verify API key from request header
+
+    Args:
+        x_api_key: API key from X-API-Key header
+
+    Raises:
+        HTTPException: 401 if API key is invalid or missing
+    """
+    if not OCR_API_KEY:
+        logger.warning("OCR_API_KEY not configured - API key validation disabled")
+        return  # Skip validation if no key configured
+
+    if not x_api_key or x_api_key != OCR_API_KEY:
+        logger.warning(f"Unauthorized OCR request - invalid API key")
+        raise HTTPException(
+            status_code=401,
+            detail="Unauthorized - invalid or missing API key"
+        )
+    return x_api_key
+
 
 # Regex patterns for field extraction
 PATTERNS = {
@@ -96,10 +123,12 @@ async def list_models():
     }
 
 
-@app.post("/v1/parse")
+@app.post("/v1/parse", dependencies=[Depends(verify_api_key)])
 async def parse_receipt(file: UploadFile = File(...)):
     """
     Process receipt/invoice image and extract structured data
+
+    Security: Requires X-API-Key header for authentication
 
     Args:
         file: Image file (JPEG, PNG, PDF)
