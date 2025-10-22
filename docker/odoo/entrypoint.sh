@@ -11,4 +11,5 @@ done
 echo "PostgreSQL is up - executing command"
 
 # Execute Odoo with configuration
-exec /usr/bin/odoo -c /etc/odoo/odoo.conf "$@"
+# Note: Ignoring "$@" as the base image already sets the correct command
+exec /usr/bin/odoo -c /etc/odoo/odoo.conf
