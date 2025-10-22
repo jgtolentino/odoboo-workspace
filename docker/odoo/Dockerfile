@@ -3,13 +3,13 @@ FROM odoo:18.0-20251008
 USER root
 
 # Install system dependencies for OCA modules
+# Note: libpq-dev omitted due to version conflict with base image's PostgreSQL 18
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libxml2-dev \
     libxslt1-dev \
     libldap2-dev \
     libsasl2-dev \
-    libpq-dev \
     wkhtmltopdf \
     curl \
     && rm -rf /var/lib/apt/lists/*
