@@ -15,7 +15,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies for OCA modules
-RUN pip3 install --no-cache-dir \
+# Using --break-system-packages as this is a Docker container (PEP 668)
+RUN pip3 install --no-cache-dir --break-system-packages \
     num2words \
     xlsxwriter \
     xlrd \
