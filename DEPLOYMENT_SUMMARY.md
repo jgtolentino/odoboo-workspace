@@ -1,6 +1,6 @@
 # Odoo 18 Production Deployment - Complete Summary
 
-**Date**: October 22, 2025
+**Date**: October 23, 2025
 **Server**: 188.166.237.231 (ocr-service-droplet, Singapore)
 **Domain**: https://insightpulseai.net
 **Status**: ✅ **PRODUCTION READY**
@@ -40,7 +40,12 @@
 - **Agent**: do-agent v3.18.5 installed and running
 - **Status**: `systemctl status do-agent` → active (running)
 - **Metrics**: CPU, memory, disk, load, bandwidth available
-- **Alerts**: Pending email verification (see DO_MONITORING_SETUP.md)
+- **Alerts**: 5 active alerts configured (jgtolentino_rn@yahoo.com)
+  - CPU >85% for 5min
+  - Memory >85% for 5min
+  - Disk >80% for 1hr
+  - Load >2.0 for 5min
+  - Bandwidth >400MB/s for 5min
 
 ---
 
@@ -140,29 +145,18 @@ odoobo-traefik-1  Up 8+ hours
 
 ### Documentation
 ```
-/opt/odoobo/README.md              - Project documentation
-/opt/odoobo/SSH_RECOVERY.md        - SSH recovery procedures
-/opt/odoobo/DO_MONITORING_SETUP.md - Monitoring configuration
-/opt/odoobo/DEPLOYMENT_SUMMARY.md  - This file
+/opt/odoobo/README.md               - Project documentation
+/opt/odoobo/SSH_RECOVERY.md         - SSH recovery procedures
+/opt/odoobo/DO_MONITORING_SETUP.md  - Monitoring configuration guide
+/opt/odoobo/MONITORING_ALERTS.md    - Active monitoring alerts (5 configured)
+/opt/odoobo/DEPLOYMENT_SUMMARY.md   - This file
 ```
 
 ---
 
 ## 🎯 Pending Actions
 
-### 1. Email Verification for Monitoring Alerts
-**Action Required**: Verify `ops@insightpulseai.net` in DigitalOcean
-
-**Steps**:
-1. Log in to https://cloud.digitalocean.com
-2. Go to **Settings** → **Notifications**
-3. Add email: `ops@insightpulseai.net`
-4. Click verification link in email
-5. Run alert creation commands from DO_MONITORING_SETUP.md
-
-**Alternative**: Use your verified email in alert commands
-
-### 2. PaddleOCR Implementation
+### 1. PaddleOCR Implementation
 **Requirement**: Receipt/invoice OCR for Odoo hr.expense
 
 **Specifications** (from user):
@@ -180,7 +174,7 @@ odoobo-traefik-1  Up 8+ hours
 - Odoo hr.expense integration module
 - Supabase storage for images + metadata
 
-### 3. OCR API Endpoint
+### 2. OCR API Endpoint
 **Integration**: RESTful API for Odoo module
 
 **Features**:
@@ -235,7 +229,9 @@ odoobo-traefik-1  Up 8+ hours
 8519cfb - fix: entrypoint.sh pass-through command arguments for longpolling
 dd81bfb - fix: use gevent_port in odoo.conf instead of --longpolling-port
 d627b9d - fix: route both /longpolling and /websocket to port 8072
-<current> - docs: Add DigitalOcean monitoring setup guide
+610991a - docs: Add DigitalOcean monitoring setup guide
+af61809 - docs: Complete DigitalOcean monitoring alerts configuration
+<current> - docs: Update deployment summary with completed monitoring
 ```
 
 **Branch**: main
@@ -255,10 +251,10 @@ d627b9d - fix: route both /longpolling and /websocket to port 8072
 - ✅ Backups automated and tested
 - ✅ Health monitoring deployed
 - ✅ DO monitoring agent installed
-- ⏳ Monitoring alerts (pending email verification)
+- ✅ Monitoring alerts (5 active alerts)
 
 **Production Status**: ✅ **READY**
 
 ---
 
-*Last Updated: October 22, 2025 20:35 UTC*
+*Last Updated: October 23, 2025 05:15 UTC*
