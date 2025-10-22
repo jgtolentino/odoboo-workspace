@@ -1,9 +1,9 @@
 http:
   middlewares:
-    block-external-apps:
-      headers:
-        customResponseHeaders:
-          Content-Security-Policy: "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self'"
+    rate-login:
+      rateLimit:
+        average: 20
+        burst: 40
 
     security-headers:
       headers:
@@ -15,4 +15,6 @@ http:
         forceSTSHeader: true
         contentTypeNosniff: true
         browserXssFilter: true
-        referrerPolicy: "strict-origin-when-cross-origin"
+        referrerPolicy: "no-referrer"
+        contentSecurityPolicy: "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self'"
+        permissionsPolicy: "camera=(), geolocation=()"

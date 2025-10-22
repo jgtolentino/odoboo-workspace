@@ -18,3 +18,7 @@
 	path = addons/oca/account-financial-tools
 	url = https://github.com/OCA/account-financial-tools
 	branch = 18.0
+[submodule "addons/oca/server-auth"]
+	path = addons/oca/server-auth
+	url = https://github.com/OCA/server-auth
+	branch = 18.0

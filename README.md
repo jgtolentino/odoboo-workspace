@@ -106,6 +106,7 @@ OCA modules are tracked as git submodules with specific commit SHAs for reproduc
 | queue | OCA/queue | 18.0 | `edc21e4c4ef11a1ef746ca5ac641e9227602a35d` |
 | reporting-engine | OCA/reporting-engine | 18.0 | `0049fa4ac2ff5e9814d5bfc0ac4f245c6a606dc2` |
 | account-financial-tools | OCA/account-financial-tools | 18.0 | `adeca0de879bd201a6802570590cac87de4e82aa` |
+| server-auth | OCA/server-auth | 18.0 | Latest (2FA: `auth_totp`) |
 
 **To add OCA modules:**
 ```bash
@@ -163,7 +164,27 @@ tar -xzf filestore.tar.gz
 docker cp filestore/insightpulse_prod odoo:/var/lib/odoo/filestore/
 ```
 
-## 🔒 Security
+## 🔒 Security & Hardening
+
+### Production Configuration
+
+**Resource Limits:**
+- Workers: 5 (2*CPU + 1)
+- Memory: 2GB hard limit, 1GB soft limit
+- CPU: 2.0 cores
+- Request timeout: 120s (CPU + real)
+- Log rotation: 100MB × 5 files
+
+**Rate Limiting:**
+- Login attempts: 20/sec average, 40 burst
+- Applied via Traefik middleware
+
+**Security Headers:**
+- HSTS: 31536000s (1 year)
+- X-Frame-Options: DENY
+- Content-Security-Policy: Restricted origins
+- Permissions-Policy: camera/geolocation blocked
+- Referrer-Policy: no-referrer
 
 ### Domain Locking
 
@@ -174,9 +195,9 @@ Odoo is configured to only serve `insightpulseai.net`:
 - `dbfilter = ^insightpulse_prod$`
 - Traefik router only accepts `insightpulseai.net` Host header
 
-### Disabled Features
+### SaaS/Enterprise Blocking
 
-- Odoo SaaS app store (`publisher_warranty_url = ''`)
+- Odoo SaaS app store disabled (`publisher_warranty_url = ''`)
 - IAP services (`iap.endpoint = localhost`)
 - Database expiration checks
 
@@ -229,6 +250,86 @@ docker compose exec traefik cat /letsencrypt/acme.json
 ./scripts/health_check.sh
 curl -v https://insightpulseai.net/web/health
 ```
+
+## 🔄 Automated Backups
+
+### Local Backups
+
+**Schedule:**
+- Database: Daily at 2:00 AM (`pg_dump -Fc`)
+- Filestore: Daily at 2:15 AM (tar.gz)
+- Retention: 14 days
+- Location: `/opt/odoobo/backup/`
+
+**Setup:**
+```bash
+ssh root@188.166.237.231
+cd /opt/odoobo
+chmod +x scripts/setup_backups.sh
+./scripts/setup_backups.sh
+```
+
+### Off-site Backups (DigitalOcean Spaces)
+
+**Configuration:**
+```bash
+# Set environment variables
+export AWS_ACCESS_KEY_ID=your_do_spaces_key
+export AWS_SECRET_ACCESS_KEY=your_do_spaces_secret
+export DO_SPACE=your-space-name
+export DO_REGION=sgp1
+
+# Run sync (manual or via cron)
+./scripts/sync_to_spaces.sh
+```
+
+**Add to cron for daily sync at 3 AM:**
+```bash
+echo "0 3 * * * root /opt/odoobo/scripts/sync_to_spaces.sh >> /var/log/spaces_sync.log 2>&1" >> /etc/cron.d/odoobo_backup
+```
+
+### Restore Procedures
+
+**Database restore:**
+```bash
+cat backup/db_YYYY-MM-DD.dump | docker compose exec -T db pg_restore -U odoo -d insightpulseai.net --clean
+```
+
+**Filestore restore:**
+```bash
+tar -xzf backup/filestore_YYYY-MM-DD.tgz
+docker cp filestore/odoobo_odoo-data odoo:/var/lib/odoo/filestore/
+```
+
+## 📊 Monitoring & Alerts
+
+### Health Checks
+
+**Manual check:**
+```bash
+curl -sf https://insightpulseai.net/web/health
+# Expected: {"status": "pass"}
+```
+
+**Automated monitoring (cron):**
+```bash
+# Add to /etc/cron.d/odoobo_health
+*/5 * * * * root /opt/odoobo/scripts/monitor_health.sh >> /var/log/odoo_health.log 2>&1
+```
+
+**Configure alert email:**
+```bash
+export ALERT_EMAIL=ops@insightpulseai.net
+```
+
+### TLS Certificate Renewal
+
+**Check Traefik logs:**
+```bash
+docker logs traefik 2>&1 | grep -E "Renewing certificate|legolog"
+```
+
+Certificates auto-renew via Let's Encrypt. HTTP-01 challenge requires ports 80/443 accessible.
 
 ## 📋 Cutover Checklist
 
