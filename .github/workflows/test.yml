@@ -1,0 +1,50 @@
+name: Test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: odoo
+          POSTGRES_PASSWORD: odoo
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U odoo"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build Odoo container
+        run: |
+          docker build -t test-odoo -f docker/odoo/Dockerfile .
+
+      - name: Run Odoo tests
+        run: |
+          docker run --rm --network=host \
+            -e POSTGRES_USER=odoo \
+            -e POSTGRES_PASSWORD=odoo \
+            -e POSTGRES_DB=postgres \
+            test-odoo \
+            odoo -i base -d testdb --stop-after-init --test-enable
+
+      - name: Test custom modules
+        run: |
+          # Add custom module tests here
+          echo "Custom module tests would run here"

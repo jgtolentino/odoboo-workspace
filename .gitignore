@@ -1,0 +1,57 @@
+# Environment variables
+.env.prod
+.env.production
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+
+# Odoo
+*.log
+filestore/
+sessions/
+*.pyc
+
+# Backups
+backups/
+*.dump
+*.tar.gz
+*.sql
+*.bak
+
+# Docker
+docker-compose.override.yml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# SSL Certificates (Let's Encrypt handled by Docker volume)
+*.pem
+*.key
+*.crt
+
+# Secrets
+secrets/
+*.secret

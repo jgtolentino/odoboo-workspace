@@ -1,0 +1,75 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Backup production database
+        uses: appleboy/ssh-action@master
+        with:
+          host: 188.166.237.231
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/odoobo
+            ./scripts/backup.sh
+
+      - name: Deploy code updates
+        uses: appleboy/ssh-action@master
+        with:
+          host: 188.166.237.231
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/odoobo
+            git pull origin main --recurse-submodules
+            git submodule update --remote --merge
+            ./scripts/update.sh
+
+      - name: Run health checks
+        uses: appleboy/ssh-action@master
+        with:
+          host: 188.166.237.231
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/odoobo
+            ./scripts/health_check.sh
+
+      - name: Rollback on failure
+        if: failure()
+        uses: appleboy/ssh-action@master
+        with:
+          host: 188.166.237.231
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/odoobo
+            # Find latest backup
+            LATEST_DB=$(ls -t backups/db_*.dump | head -1)
+            LATEST_FS=$(ls -t backups/filestore_*.tar.gz | head -1)
+            # Restore
+            ./scripts/restore.sh "$LATEST_DB" "$LATEST_FS"
+            echo "❌ Deployment failed - rolled back to previous backup"
+
+      - name: Notify success
+        if: success()
+        run: |
+          echo "✅ Deployment successful to https://insightpulseai.net"

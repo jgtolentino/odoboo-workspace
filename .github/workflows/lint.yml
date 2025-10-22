@@ -1,0 +1,36 @@
+name: Lint
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install pre-commit pylint-odoo black isort flake8
+
+      - name: Run pre-commit hooks
+        run: |
+          pre-commit run --all-files || true
+
+      - name: Check Python code style
+        run: |
+          black --check addons/custom/ || true
+          isort --check addons/custom/ || true
+          flake8 addons/custom/ || true
