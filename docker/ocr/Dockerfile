@@ -14,9 +14,6 @@ RUN apt-get update && apt-get install -y \
     libgl1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Install NumPy first to ensure ABI compatibility
-RUN pip install --no-cache-dir numpy==1.24.3
-
 # Install Python dependencies
 RUN pip install --no-cache-dir \
     fastapi==0.104.1 \
@@ -27,6 +24,9 @@ RUN pip install --no-cache-dir \
     paddleocr==2.7.3 \
     pytesseract==0.3.10 \
     opencv-python-headless==4.8.1.78
+
+# Force NumPy 1.x for ABI compatibility (must be after other dependencies)
+RUN pip install --no-cache-dir --force-reinstall numpy==1.24.3
 
 # Download PaddleOCR models on build (saves startup time)
 RUN python -c "from paddleocr import PaddleOCR; ocr = PaddleOCR(use_angle_cls=True, lang='en', use_gpu=False, show_log=False)"
