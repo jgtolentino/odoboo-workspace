@@ -11,5 +11,11 @@ done
 echo "PostgreSQL is up - executing command"
 
 # Execute Odoo with configuration
-# Note: Ignoring "$@" as the base image already sets the correct command
-exec /usr/bin/odoo -c /etc/odoo/odoo.conf
+# Pass through all command arguments (e.g., --longpolling-port)
+if [ $# -eq 0 ]; then
+  # No arguments provided, use default
+  exec /usr/bin/odoo -c /etc/odoo/odoo.conf
+else
+  # Arguments provided (e.g., from compose.yaml command:), use them
+  exec "$@"
+fi
