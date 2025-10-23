@@ -3,6 +3,7 @@
 import base64
 import io
 import logging
+import os
 import requests
 from datetime import datetime
 
@@ -12,6 +13,7 @@ from odoo.exceptions import UserError
 _logger = logging.getLogger(__name__)
 
 OCR_SERVICE_URL = "http://ocr-service:8000"
+OCR_API_KEY = os.environ.get('OCR_API_KEY', '')
 
 
 class ExpenseOCR(models.Model):
@@ -72,10 +74,18 @@ class ExpenseOCR(models.Model):
             # Prepare image for API call
             image_bytes = base64.b64decode(self.image_data)
 
+            # Prepare headers with API key
+            headers = {}
+            if OCR_API_KEY:
+                headers['X-API-Key'] = OCR_API_KEY
+            else:
+                _logger.warning("OCR_API_KEY environment variable not set - OCR request may fail")
+
             # Call OCR service
             _logger.info(f"Processing OCR for expense OCR #{self.id}")
             response = requests.post(
                 f"{OCR_SERVICE_URL}/v1/parse",
+                headers=headers,
                 files={'file': (self.image_filename or 'receipt.jpg', io.BytesIO(image_bytes), 'image/jpeg')},
                 timeout=30
             )
