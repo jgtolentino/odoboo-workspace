@@ -28,6 +28,14 @@ Receipt Image → OCR Service (PaddleOCR) → JSON → Odoo hr.expense
 - **Routing**: Traefik `/api/ocr/*`
 - **Odoo Module**: `hr_expense_ocr_audit`
 
+**Security**:
+- **Authentication**: X-API-Key header required for all OCR operations
+- **Rate Limiting**: 10 requests/second average, 20 burst (Traefik middleware)
+- **Request Size**: 10 MB maximum via buffering middleware
+- **Security Headers**: CSP, referrer policy, X-Frame-Options
+- **HTTPS Only**: Automatic SSL via Let's Encrypt
+- **Health Endpoint**: Public (no auth) for monitoring
+
 ---
 
 ## 🚀 Deployment
@@ -138,13 +146,21 @@ Now all new expenses with image attachments will auto-process OCR.
 **Base URL**: `http://ocr-service:8000` (internal)
 **Public URL**: `https://insightpulseai.net/api/ocr` (via Traefik)
 
+**Security**: All OCR endpoints (except /health) require `X-API-Key` header for authentication
+
+**Rate Limits**: 10 requests/second average, 20 burst
+**Request Size Limit**: 10 MB maximum
+
 #### POST /v1/parse
 
 Process receipt image and extract structured data.
 
+**Authentication**: Requires `X-API-Key` header
+
 **Request**:
 ```bash
 curl -X POST https://insightpulseai.net/api/ocr/v1/parse \
+  -H "X-API-Key: YOUR_API_KEY" \
   -F "file=@receipt.jpg"
 ```
 
